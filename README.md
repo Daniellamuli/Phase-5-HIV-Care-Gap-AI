@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="figures/logo.jpg" alt="HIV Care Gap AI Logo" width="400"/>
+  <img src="figures/logo.jpg" alt="HIV Care Gap AI Logo" width="200"/>
   
   ## Team Members
   **Daniella Muli • Eve Michelle • Naomi Opiyo • Pheonverah Achieng' • Lorenah Mbogo • Dennis Kamuri**
