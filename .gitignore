@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+.env
+venv/
+learn-env/
+
+# Data files
+data/raw/*.xlsx
+data/raw/*.csv
+data/raw/*.dta
+
+# Models
+*.pkl
+
+# OS files
+.DS_Store
+Thumbs.db

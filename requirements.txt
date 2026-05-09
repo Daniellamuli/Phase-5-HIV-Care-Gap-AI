@@ -1,0 +1,15 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+xgboost
+prophet
+lifelines
+openpyxl
+streamlit
+geopandas
+folium
+streamlit-folium
+jupyter
+notebook
