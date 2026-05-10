@@ -1,9 +1,9 @@
 # HIV Care Gap AI: Kenya — Project Plan 
 **County Risk Mapping · Individual Dropout Prediction · 2030 Scenario Forecasting**
 
-> **Team:** Daniella (Lead) · Eve · Verah · Naomi · Lorenah · Dennis  
+> **Team:** Daniella · Eve · Verah · Naomi · Lorenah · Dennis  
 > **Timeline:** 10 working days · **Methodology:** CRISP-DM  
-> **Status:** Day 1 starts with `01_data_extraction.ipynb` ✅ COMPLETE
+> **Status:** Day 1 starts with `01_data_extraction.ipynb` 
 
 ---
 
@@ -30,61 +30,66 @@
 
 ---
 
-## Repository Structure (Your Actual Layout)
+## Repository Structure
+# Project Structure
+
+```text
 hiv-care-gap-ai/
 │
 ├── data/
-│ ├── raw/ ← All 5 files present 
-│ │ ├── Adult_on_ART.xlsx
-│ │ ├── Adult_on_HTS.xlsx
-│ │ ├── IIT.xlsx
-│ │ ├── VLT.xlsx
-│ │ └── individual_features.csv
-│ └── processed/ ← Empty — will be populated
+│   ├── raw/                         ← All 5 files present
+│   │   ├── Adult_on_ART.xlsx
+│   │   ├── Adult_on_HTS.xlsx
+│   │   ├── IIT.xlsx
+│   │   ├── VLT.xlsx
+│   │   └── individual_features.csv
+│   │
+│   └── processed/                  ← Empty — will be populated
 │
-├── notebooks/ ← 10 notebooks total
-│ ├── 01_data_extraction.ipynb  COMPLETE (Naomi)
-│ ├── 02_nsdcc_cleaning.ipynb  Needs NSDCC + DHS cells
-│ ├── 03_dhs_cleaning.ipynb  Needs completion
-│ ├── 04_feature_engineering.ipynb ⚠️ Needs completion
-│ ├── 05_model_1_county_clustering.ipynb
-│ ├── 06_model_2_dropout_prediction.ipynb
-│ ├── 07_model_3_forecasting.ipynb
-│ ├── 08_model_evaluation.ipynb
-│ ├── 09_deployment.ipynb
-│ └── 10_monitoring.ipynb
+├── notebooks/                      ← 10 notebooks total
+│   ├── 01_data_extraction.ipynb               COMPLETE (Naomi)
+│   ├── 02_nsdcc_cleaning.ipynb                Needs NSDCC + DHS cells
+│   ├── 03_dhs_cleaning.ipynb                  Needs completion
+│   ├── 04_feature_engineering.ipynb           Needs completion
+│   ├── 05_model_1_county_clustering.ipynb
+│   ├── 06_model_2_dropout_prediction.ipynb
+│   ├── 07_model_3_forecasting.ipynb
+│   ├── 08_model_evaluation.ipynb
+│   ├── 09_deployment.ipynb
+│   └── 10_monitoring.ipynb
 │
-├── src/ ← Python modules (NOT scripts/)
-│ ├── init.py
-│ ├── utils.py ← Shared helpers
-│ ├── data_preprocessing.py ← Load + clean functions
-│ ├── feature_engineering.py ← CGI + tier aggregation
-│ ├── model_training.py ← KMeans + XGBoost + Prophet
-│ ├── evaluation.py ← Metrics functions
-│ └── forecasting.py ← Prophet scenario functions
+├── src/                            ← Python modules (NOT scripts/)
+│   ├── __init__.py
+│   ├── utils.py                              ← Shared helpers
+│   ├── data_preprocessing.py                 ← Load + clean functions
+│   ├── feature_engineering.py                ← CGI + tier aggregation
+│   ├── model_training.py                     ← KMeans + XGBoost + Prophet
+│   ├── evaluation.py                         ← Metrics functions
+│   └── forecasting.py                        ← Prophet scenario functions
 │
-├── scripts/ ← Production pipeline scripts
-│ ├── extract_data.py ← Wrapper for data loading
-│ ├── merge_data.py ← Merge NSDCC files
-│ ├── prepare_data.py ← Feature engineering wrapper
-│ ├── train_model1.py ← KMeans wrapper
-│ ├── train_model2.py ← XGBoost wrapper
-│ └── train_model3.py ← Prophet wrapper
+├── scripts/                        ← Production pipeline scripts
+│   ├── extract_data.py                       ← Wrapper for data loading
+│   ├── merge_data.py                         ← Merge NSDCC files
+│   ├── prepare_data.py                       ← Feature engineering wrapper
+│   ├── train_model1.py                       ← KMeans wrapper
+│   ├── train_model2.py                       ← XGBoost wrapper
+│   └── train_model3.py                       ← Prophet wrapper
 │
 ├── app/
-│ ├── streamlit_app.py
-│ ├── trigger_alerts.py
-│ └── trigger_predictions.py
+│   ├── streamlit_app.py
+│   ├── trigger_alerts.py
+│   └── trigger_predictions.py
 │
-├── models/ ← Empty — will hold .pkl files
-├── figures/ ← logo.jpg + exported charts
-├── presentation/ ← Slides
-├── tableau/ ← Tableau dashboard files
-├── constants.py ←  On main
-├── main.py ←  To be created
+├── models/                         ← Empty — will hold .pkl files
+├── figures/                        ← Logo.jpg + exported charts
+├── presentation/                   ← Slides
+├── tableau/                        ← Tableau dashboard files
+│
+├── constants.py                    ←  On main
+├── main.py                         ←  To be created
 ├── requirements.txt
 ├── .gitignore
-└── PROJECT_PLAN.md ← This file
+└── PROJECT_PLAN.md                 
 ---
 
 # 📅 DAY-BY-DAY PLAN (10 Days)
