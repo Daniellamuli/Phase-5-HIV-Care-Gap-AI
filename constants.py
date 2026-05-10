@@ -146,7 +146,14 @@ ART_COUNTY_SUFFIX = " County"
 HTS_COUNTY_SUFFIX = " County"         # ← NEW: HTS has same suffix as ART
 
 # IIT file uses a "Region" column, not "County"
-IIT_REGION_COL    = "Region"          # ← NEW: column name in IIT.xlsx
+IIT_REGION_COL    = "Region"          # ← column name in IIT.xlsx
+
+# Per-file county column aliases
+# (clean_data.py imports these individually so each file's column is explicit)
+ART_COUNTY_COL = NSDCC_COUNTY_COL   # "County"
+HTS_COUNTY_COL = NSDCC_COUNTY_COL   # "County"
+VLT_COUNTY_COL = NSDCC_COUNTY_COL   # "County"
+IIT_COUNTY_COL = IIT_REGION_COL     # "Region"
 
 
 # =============================================================
@@ -171,7 +178,7 @@ REGION_TO_COUNTIES = {
         "Nairobi",
     ],
     "Central": [
-        "Kiambu", "Muranga", "Nyandarua", "Nyeri", "Kirinyaga",
+        "Kiambu", "Murang'a", "Nyandarua", "Nyeri", "Kirinyaga",
     ],
     "Coast": [
         "Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu", "Taita Taveta",
@@ -279,7 +286,7 @@ COUNTY_NAME_MAP = {
     "Migori":          "Migori",
     "Mombasa":         "Mombasa",
     "Murang'a":        "Murang'a",
-    "Muranga":         "Murang'a",
+    "Murang'a":         "Murang'a",
     "Nairobi":         "Nairobi",
     "Nakuru":          "Nakuru",
     "Nandi":           "Nandi",
