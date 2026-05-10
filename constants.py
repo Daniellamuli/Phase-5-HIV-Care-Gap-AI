@@ -33,7 +33,7 @@ ADULT_ART_FILE = os.path.join(RAW_DIR, "Adult_on_ART.xlsx")
 HTS_FILE       = os.path.join(RAW_DIR, "Adult_on_HTS.xlsx")
 VLT_FILE       = os.path.join(RAW_DIR, "VLT.xlsx")           # Viral Load Testing
 IIT_FILE       = os.path.join(RAW_DIR, "IIT.xlsx")           # Interruption in Treatment
-DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")   
+DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")  # already reduced 
 
 # ── PROCESSED / INTERMEDIATE FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
@@ -123,6 +123,17 @@ TAB3_TITLE     = "2030 Forecast"
 
 # ── IIT ALERT THRESHOLD
 IIT_ALERT_FALLBACK_THRESHOLD = 0.15   # 15% — update after EDA in notebook 04
+
+
+# ── NSDCC COLUMN NAME CONFIG
+# The column name for county in each NSDCC raw file (all use "County").
+# ART values have a " County" suffix (e.g. "Baringo County") — stripped in cleaning.
+# Update these if your file export uses different column names.
+NSDCC_COUNTY_COL = "County"
+NSDCC_PERIOD_COL = "Period"
+
+# ART files include " County" suffix in county values — strip this during cleaning
+ART_COUNTY_SUFFIX = " County"
 
 # =============================================================
 # COUNTY NAME MAP
@@ -244,6 +255,55 @@ COUNTY_NAME_MAP = {
     "KWALE":               "Kwale",
     "KILIFI":              "Kilifi",
     "LAMU":                "Lamu",
+    # ── ART file variants — county values include " County" suffix
+    # These are auto-stripped in clean_data.py but kept here as a fallback
+    "Baringo County":         "Baringo",
+    "Bomet County":           "Bomet",
+    "Bungoma County":         "Bungoma",
+    "Busia County":           "Busia",
+    "Elgeyo Marakwet County": "Elgeyo Marakwet",
+    "Embu County":            "Embu",
+    "Garissa County":         "Garissa",
+    "Homa Bay County":        "Homa Bay",
+    "Isiolo County":          "Isiolo",
+    "Kajiado County":         "Kajiado",
+    "Kakamega County":        "Kakamega",
+    "Kericho County":         "Kericho",
+    "Kiambu County":          "Kiambu",
+    "Kilifi County":          "Kilifi",
+    "Kirinyaga County":       "Kirinyaga",
+    "Kisii County":           "Kisii",
+    "Kisumu County":          "Kisumu",
+    "Kitui County":           "Kitui",
+    "Kwale County":           "Kwale",
+    "Laikipia County":        "Laikipia",
+    "Lamu County":            "Lamu",
+    "Machakos County":        "Machakos",
+    "Makueni County":         "Makueni",
+    "Mandera County":         "Mandera",
+    "Marsabit County":        "Marsabit",
+    "Meru County":            "Meru",
+    "Migori County":          "Migori",
+    "Mombasa County":         "Mombasa",
+    "Murang'a County":       "Murang'a",
+    "Nairobi County":         "Nairobi",
+    "Nakuru County":          "Nakuru",
+    "Nandi County":           "Nandi",
+    "Narok County":           "Narok",
+    "Nyamira County":         "Nyamira",
+    "Nyandarua County":       "Nyandarua",
+    "Nyeri County":           "Nyeri",
+    "Samburu County":         "Samburu",
+    "Siaya County":           "Siaya",
+    "Taita Taveta County":    "Taita Taveta",
+    "Tana River County":      "Tana River",
+    "Tharaka Nithi County":   "Tharaka Nithi",
+    "Trans Nzoia County":     "Trans Nzoia",
+    "Turkana County":         "Turkana",
+    "Uasin Gishu County":     "Uasin Gishu",
+    "Vihiga County":          "Vihiga",
+    "Wajir County":           "Wajir",
+    "West Pokot County":      "West Pokot",
 }
 
 # =============================================================
