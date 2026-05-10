@@ -1,8 +1,17 @@
-# **HIV Care Gap AI: Kenya**
+<div align="center">
+  <img src="figures/logo.jpg" alt="HIV Care Gap AI Logo" width="200"/>
+  
+  ## Team Members
+  **Daniella Muli • Eve Michelle • Naomi Opiyo • Pheonverah Achieng' • Lorenah Mbogo • Dennis Kamuri**
+  
+  # HIV Care Gap AI: Kenya
+  
+  **County Risk Mapping · Individual Dropout Prediction · 2030 Scenario Forecasting**
+  
+  **Using Machine Learning to Predict Who Kenya is Leaving Behind**
+</div>
 
-County Risk Mapping · Individual Dropout Prediction · 2030 Scenario Forecasting
-
-Using Machine Learning to Predict Who Kenya is Leaving Behind
+---
 
 
 ## **1. BUSINESS UNDERSTANDING:**
