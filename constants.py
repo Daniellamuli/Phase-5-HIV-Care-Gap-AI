@@ -29,13 +29,11 @@ PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
 MODELS_DIR    = os.path.join(ROOT_DIR, "models")
 
 # ── RAW INPUT FILES
-# ⚠  These names must exactly match the filenames in data/raw/
-#    as confirmed in the GitHub repo screenshot.
 ADULT_ART_FILE = os.path.join(RAW_DIR, "Adult_on_ART.xlsx")
 HTS_FILE       = os.path.join(RAW_DIR, "Adult_on_HTS.xlsx")
 VLT_FILE       = os.path.join(RAW_DIR, "VLT.xlsx")           # Viral Load Testing
 IIT_FILE       = os.path.join(RAW_DIR, "IIT.xlsx")           # Interruption in Treatment
-DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")  # already reduced ✅
+DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")   
 
 # ── PROCESSED / INTERMEDIATE FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
