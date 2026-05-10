@@ -32,8 +32,6 @@
 
 # Repository Structure
 
-## Project Structure
-
 ```text
 hiv-care-gap-ai/
 │
@@ -47,7 +45,7 @@ hiv-care-gap-ai/
 │   │
 │   └── processed/                  ← Empty — will be populated
 │
-├── notebooks/                      ← 10 notebooks total
+├── notebooks/                      ← 11 notebooks total
 │   ├── 01_data_extraction.ipynb               COMPLETE (Naomi)
 │   ├── 02_nsdcc_cleaning.ipynb                Needs NSDCC + DHS cells
 │   ├── 03_dhs_cleaning.ipynb                  Needs completion
@@ -57,7 +55,8 @@ hiv-care-gap-ai/
 │   ├── 07_model_3_forecasting.ipynb
 │   ├── 08_model_evaluation.ipynb
 │   ├── 09_deployment.ipynb
-│   └── 10_monitoring.ipynb
+│   ├── 10_monitoring.ipynb
+│   └── final_notebook.ipynb
 │
 ├── src/                            ← Python modules (NOT scripts/)
 │   ├── __init__.py
@@ -95,7 +94,7 @@ hiv-care-gap-ai/
 
 ---
 
-# 📅 DAY-BY-DAY PLAN (10 Days)
+#  DAY-BY-DAY PLAN (10 Days)
 
 ---
 
@@ -153,9 +152,9 @@ hiv-care-gap-ai/
 
 ---
 
-# Parallel Flow Summary
+## Parallel Flow Summary
 
-## Days 1-2: Maximum Parallelism (Everyone Works)
+### Days 1-2: Maximum Parallelism (Everyone Works)
 
 | Person | Day 1 | Day 2 |
 |--------|-------|-------|
@@ -166,7 +165,60 @@ hiv-care-gap-ai/
 | Dennis | `src/utils.py` | `src/evaluation.py` |
 | Daniella | `main.py` (skeleton) | `main.py` (wire Days 1-2) |
 
-> **ALL 6 WORKING IN PARALLEL — NO ONE WAITING**
+** ALL 6 WORKING IN PARALLEL — NO ONE WAITING**
+
+### Days 3-4: Three Parallel Streams
+
+| Stream | Day 3 | Day 4 |
+|--------|-------|-------|
+| **A (Model 1)** | Eve: `scripts/train1.py` | Eve: `scripts/train3.py` |
+| | Naomi: `05_model_1_county_clustering.ipynb` | Naomi: `src/forecasting.py` |
+| **B (Model 2)** | Lorenah: `06_model_2_dropout_prediction.ipynb` (XGBoost) | Lorenah: `scripts/train2.py` |
+| | Verah: `07_model_3_forecasting.ipynb` (BAU) | Verah: `07_model_3_forecasting.ipynb` (Scenario B) |
+| **C (Core)** | Dennis: `src/model_training.py` | Dennis: `app/streamlit_app.py` (Tab 1) |
+| | Daniella: `main.py` | Daniella: `main.py` |
+
+**Stream A: County Clustering (Model 1)**
+- Eve writes `scripts/train_model1.py`
+- Naomi completes `05_model_1_county_clustering.ipynb`
+- *Internal dependency:* Naomi needs Verah's `county_profiles.csv` (from Day 2)
+
+**Stream B: Dropout Prediction (Model 2) + Forecasting Start (Model 3)**
+- Lorenah completes `06_model_2_dropout_prediction.ipynb` (XGBoost)
+- Verah starts `07_model_3_forecasting.ipynb` (BAU forecast)
+
+**Stream C: Core Infrastructure**
+- Dennis writes `src/model_training.py`
+- Daniella wires Models 1-2 into `main.py`
+
+** All three streams run at the same time. No stream waits for another.**
+
+### Days 5-10: Fully Parallel (No Blocks)
+
+Each person has their own distinct task each day. No dependencies between people.
+
+| Day | Eve | Lorenah | Verah | Naomi | Dennis | Daniella |
+|-----|-----|---------|-------|-------|--------|----------|
+| 5 | Support dashboard | Support dashboard | `app/trigger_alerts.py` | `app/trigger_predictions.py` | Complete dashboard Tabs 2-3 | Start `final_notebook.ipynb` |
+| 6 | Run `08_model_evaluation.ipynb` (Model 1) | Run `08_model_evaluation.ipynb` (Model 2) | Run `08_model_evaluation.ipynb` (Model 3) | Compile all metrics | Add metrics footer to dashboard | Create `presentation/slides.md` outline |
+| 7 | Test `trigger_predictions.py` | Test `trigger_alerts.py` | Update `README.md` | Complete `10_monitoring.ipynb` | Deploy dashboard (test) | Complete `final_notebook.ipynb` |
+| 8 | Create Model 1 slides | Create Model 2 slides | Create Model 3 slides | Create Data + Methodology slides | Polish dashboard | Assemble all slides |
+| 9 | Run full pipeline on clean environment | Test triggers with sample data | Verify README commands | Audit `constants.py` | Final deployment | Lead rehearsal |
+| 10 | Present | Present | Present | Present | Present | Submit all |
+
+** COMPLETELY PARALLEL — NO DEPENDENCIES**
+
+---
+
+### Who Blocks Whom (The Only Dependencies)
+
+| If you are... | You need this from... | By when | If delayed, do this instead |
+|---------------|----------------------|---------|----------------------------|
+| Dennis (Day 2 merge) | Eve's 4 clean NSDCC CSVs | End of Day 2 | Work on `src/evaluation.py` (doesn't need NSDCC data) |
+| Naomi (Day 3 clustering) | Verah's `county_profiles.csv` | End of Day 2 | Start silhouette score exploration with dummy data |
+| Verah (Day 4 Scenario B) | Naomi's tier labels | End of Day 3 | Complete BAU forecast first, add Scenario B later |
+| Dennis (Day 5 dashboard Tabs 2-3) | All 3 `.pkl` files | End of Day 4 | Build Tab 1 first (needs only CSV, no models) |
+
 
 ---
 
@@ -186,3 +238,21 @@ hiv-care-gap-ai/
 - [ ] README has data download link + step-by-step instructions
 - [ ] GitHub repo is public/accessible
 - [ ] Team has rehearsed at least once
+
+---
+
+# Quick Reference: File Ownership by Day
+
+| Day | Eve | Lorenah | Verah | Naomi | Dennis | Daniella |
+|-----|-----|---------|-------|-------|--------|----------|
+| 1 | `02_nsdcc_cleaning.ipynb` | `03_dhs_cleaning.ipynb` | `src/data_preprocessing.py` | `constants.py` | `src/utils.py` | `main.py` |
+| 2 | `scripts/merge_data.py` | `06_model_2_dropout_prediction.ipynb` (LR) | `04_feature_engineering.ipynb` | `src/feature_engineering.py` | `src/evaluation.py` | `main.py` |
+| 3 | `scripts/train_model1.py` | `06_model_2_dropout_prediction.ipynb` (XGB) | `07_model_3_forecasting.ipynb` (BAU) | `05_model_1_county_clustering.ipynb` | `src/model_training.py` | `main.py` |
+| 4 | `scripts/train_model3.py` | `scripts/train_model2.py` | `07_model_3_forecasting.ipynb` (ScenB) | `src/forecasting.py` | `app/streamlit_app.py` (Tab 1) | `main.py` |
+| 5 | Support dashboard | Support dashboard | `app/trigger_alerts.py` | `app/trigger_predictions.py` | `app/streamlit_app.py` (Tabs 2-3) | `final_notebook.ipynb` |
+| 6 | `08_model_evaluation.ipynb` (M1) | `08_model_evaluation.ipynb` (M2) | `08_model_evaluation.ipynb` (M3) | `08_model_evaluation.ipynb` (compile) | Dashboard footer | `presentation/slides.md` |
+| 7 | Test triggers | Test alerts | `README.md` | `10_monitoring.ipynb` | Deploy test | `final_notebook.ipynb` |
+| 8 | Slides M1 | Slides M2 | Slides M3 | Slides Data | Dashboard polish | Assemble slides |
+| 9 | Pipeline test | Triggers test | Verify README | Audit constants | Final deploy | Rehearsal |
+| 10 | Present | Present | Present | Present | Present | Submit |
+
