@@ -41,6 +41,8 @@ class DHSCleaner:
         """
         self.raw_df = pd.read_csv(filepath)
         self.clean_df = self.raw_df.copy()
+        # Strip whitespace to prevent mapping failures
+        self.raw_df.columns = self.raw_df.columns.str.strip()
         print(f"Loaded {len(self.raw_df)} rows with {len(self.raw_df.columns)} columns")
         return self.raw_df
 
