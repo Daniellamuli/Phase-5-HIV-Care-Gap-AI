@@ -13,7 +13,7 @@ except ImportError:
     TIER_COLORS = {
       "Critical": "#C0392B",
       "High":     "#E67E22",
-      "Moderate": "#F1C408",
+      "Moderate": "#F1C40F",
       "Low":      "#27AE60",   
     }
 
