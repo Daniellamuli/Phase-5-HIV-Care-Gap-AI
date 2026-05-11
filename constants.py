@@ -1,5 +1,5 @@
 # =============================================================
-# constants.py — HIV Care Gap AI  (FINAL — v4)
+# constants.py — HIV Care Gap AI Project
 # Built from actual file inspection. Do not guess column names.
 #
 # REAL FILE STRUCTURES:
@@ -186,12 +186,49 @@ RANDOM_STATE         = 42
 XGB_N_ESTIMATORS     = 200
 XGB_MAX_DEPTH        = 5
 XGB_LEARNING_RATE    = 0.05
-XGB_SCALE_POS_WEIGHT = 3
+XGB_SCALE_POS_WEIGHT = 1236  # Calculated from Lorenah's DHS cleaning output
+                             # rec_weight = 32130 / 26 = 1235.77 → rounded up
+                             # Dropout: 26 individuals (0.08%) vs 32130 retained (99.92%)
 
+# DHS ACTUAL COLUMNS (confirmed from 03_dhs_cleaning.ipynb output)
+# Raw columns in individual_features.csv (15 total):
+#   case_id, county, age_group, education_level, wealth_index,
+#   worked_last_12months, ever_tested_hiv, tested_hiv_last_12months,
+#   distance_to_facility, marital_status, currently_in_union,
+#   num_sexual_partners, knows_aids_death, told_hiv_positive, has_health_insurance
+#
+# Notes from Lorenah's cleaning:
+#   - knows_aids_death     : 100% missing → DROPPED
+#   - has_health_insurance : 100% missing → DROPPED (imputed to all 0s)
+#   - anc_visits           : column does NOT exist in this dataset → REMOVED
+#   - distance_to_facility : 57% missing but kept, imputed
+#   - education_level      : one-hot encoded → edu_Higher, edu_No education,
+#                            edu_Primary, edu_Secondary
+#   - wealth_index         : one-hot encoded → wealth_Middle, wealth_Poorer,
+#                            wealth_Poorest, wealth_Richer, wealth_Richest
+
+# Features used for MODEL2 training (post one-hot encoding column names)
 MODEL2_FEATURES = [
-    "county", "age_group", "education_level", "wealth_index",
-    "distance_to_facility", "ever_tested_hiv", "tested_hiv_last_12months",
-    "marital_status", "num_sexual_partners", "has_health_insurance",
+    "county",
+    "age_group",
+    "marital_status",
+    "distance_to_facility",
+    "ever_tested_hiv",
+    "tested_hiv_last_12months",
+    "num_sexual_partners",
+    "worked_last_12months",
+    "currently_in_union",
+    # One-hot encoded education (edu_ prefix from Lorenah's DHSCleaner)
+    "edu_Higher",
+    "edu_No education",
+    "edu_Primary",
+    "edu_Secondary",
+    # One-hot encoded wealth (wealth_ prefix from Lorenah's DHSCleaner)
+    "wealth_Middle",
+    "wealth_Poorer",
+    "wealth_Poorest",
+    "wealth_Richer",
+    "wealth_Richest",
 ]
 MODEL2_TARGET = "dropout"
 
