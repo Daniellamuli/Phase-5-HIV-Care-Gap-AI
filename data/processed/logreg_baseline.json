@@ -1,0 +1,11 @@
+{
+  "model": "LogisticRegression",
+  "auc_roc": 0.7332,
+  "recall": 0.6,
+  "precision": 0.0019,
+  "f1": 0.0038,
+  "tn": 4869,
+  "fp": 1558,
+  "fn": 2,
+  "tp": 3
+}
