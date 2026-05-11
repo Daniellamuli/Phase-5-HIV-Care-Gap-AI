@@ -134,7 +134,7 @@ hiv-care-gap-ai/
 | **Eve** | Complete `02_nsdcc_cleaning.ipynb`: Load 4 NSDCC files, strip county suffix, standardise names, rename MOH columns, convert to numeric, impute missing values (county mean → column median), create before/after missing-value heatmaps, validate 47 counties and 0 duplicates, save 4 clean CSVs to `data/processed/`. THEN create `src/nsdcc_cleaner.py` with reusable functions. | 4 clean CSVs, `nsdcc_cleaner.py` |
 | **Lorenah** | Complete `03_dhs_cleaning.ipynb`: Load `individual_features.csv`, map county codes (1-47) to names, decode age/education/wealth/marital/distance columns using constants, impute binary flags with 0 and numeric with median, engineer dropout target (`told_hiv_positive=1` AND `tested_hiv_last_12months=0`), create before/after missing-value heatmap, one-hot encode education and wealth, save to `individual_features_clean.csv`. THEN create `src/dhs_cleaner.py` with reusable functions. | `individual_features_clean.csv`, `dhs_cleaner.py` |
 | **Verah** | Create `src/feature_engineering.py`: Add functions for CGI calculation and tier aggregation. | `feature_engineering.py` |
-| **Naomi** | Review DHS class balance from Lorenah's output (Cell 17). Update `XGB_SCALE_POS_WEIGHT` in `constants.py`. | `constants.py` updated |
+| **Naomi** | Review DHS class balance from Lorenah's output. Update `XGB_SCALE_POS_WEIGHT` in `constants.py`. | `constants.py` updated |
 | **Dennis** | Create `src/utils.py`: Add `standardise_county()`, `get_tier_color()`, `save_csv()`, `load_csv()` helpers. | `utils.py` |
 | **Daniella** | Review PRs, merge Day 1 work. Create `main.py` skeleton. | `main.py` |
 
@@ -146,49 +146,49 @@ hiv-care-gap-ai/
 |--------|------|-------------|
 | **Eve** | Create `scripts/merge_data.py`: Merge 4 clean NSDCC CSVs on county + period → `nsdcc_merged.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_merged.csv` |
 | **Lorenah** | Begin `06_model_2_dropout_prediction.ipynb`: Load `individual_features_clean.csv`, split data, train Logistic Regression baseline. Document AUC-ROC, Recall. | LR baseline metrics |
-| **Verah** | Complete `04_feature_engineering.ipynb` AND create `src/feature_engineering.py` with reusable functions. Compute IIT yoy change, VLS yoy change, Engineer Care Gap Index, build county_profiles.csv and tier_timeseries.csv. | `county_profiles.csv`, `tier_timeseries.csv`, `feature_engineering.py` |
+| **Verah** | Complete `04_feature_engineering.ipynb` AND add reusable functions to `src/feature_engineering.py`. Compute IIT yoy change, VLS yoy change, Engineer Care Gap Index, build county_profiles.csv and tier_timeseries.csv. | `county_profiles.csv`, `tier_timeseries.csv`, `feature_engineering.py` |
 | **Naomi** | Complete `05_model_1_county_clustering.ipynb`: KMeans clustering, silhouette score, assign tier labels, save model. | `kmeans_county_tiers.pkl` |
 | **Dennis** | Update `src/evaluation.py`: Add `silhouette_score()`, `classification_metrics()`, `forecast_errors()` functions. | `evaluation.py` |
 | **Daniella** | Wire `merge_data` and `feature_engineering` into `main.py`. Review PRs. | `main.py` Days 1-2 running |
 
 ---
 
-## Day 3 — Model 1 (KMeans) + Model 2 (XGBoost) Parallel
+## Day 3 — Model 1 + Model 2 + Model 3 Start (Parallel)
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Create `scripts/train_model1.py` wrapper for KMeans. | `train_model1.py` |
 | **Lorenah** | Complete `06_model_2_dropout_prediction.ipynb`: Train XGBoost, evaluate, plot feature importance. | XGBoost trained, metrics |
 | **Verah** | Begin `07_model_3_forecasting.ipynb`: Load tier_timeseries.csv, run Prophet BAU forecast per tier. | BAU forecasts plotted |
-| **Naomi** | Complete `05_model_1_county_clustering.ipynb`: KMeans clustering, silhouette score, assign tier labels, save model. | `kmeans_county_tiers.pkl` |
+| **Naomi** | Create `src/forecasting.py`: Add `prepare_prophet_df()`, `fit_prophet()`, `forecast_to_date()`, `apply_bridged_gap()`, `backtest_prophet()` functions. | `forecasting.py` |
 | **Dennis** | Create `src/model_training.py`: Add KMeans wrapper, XGBoost wrapper functions. | `model_training.py` |
 | **Daniella** | Update `main.py` with Model 1 + Model 2 training steps. Review PRs. | `main.py` Day 3 running |
 
 ---
 
-## Day 4 — Model 3 (Prophet) + Dashboard Tab 1 + Testing
+## Day 4 — Dashboard Foundation + Forecasting + Choropleth Map (Stretch)
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Create `scripts/train_model3.py` wrapper for Prophet. | `train_model3.py` |
-| **Lorenah** | Create `scripts/train_model2.py` wrapper for XGBoost. | `train_model2.py` |
+| **Lorenah** | Build `app/streamlit_app.py` Tab 1 (County Gap Map) — full implementation. **Stretch: Add Folium choropleth map of Kenya counties colored by tier (Critical→Low) to Tab 1.** | Tab 1 working, choropleth map (if time) |
 | **Verah** | Complete `07_model_3_forecasting.ipynb`: Add Scenario B, backtest, save forecasts. | Forecast charts, CSVs |
-| **Naomi** | Update `src/forecasting.py` AND test dashboard Tab 1 (verify county colors, sorting). | `forecasting.py`, Tab 1 validated |
-| **Dennis** | Begin `app/streamlit_app.py` Tab 1 (County Gap Map). | Tab 1 working locally |
-| **Daniella** | Update `main.py` with Model 3 + Set up Streamlit Cloud account. | `main.py` Day 4 running, Cloud ready |
+| **Naomi** | Create `scripts/train_model2.py` wrapper for XGBoost + Set up Streamlit Cloud account. | `train_model2.py`, Cloud ready |
+| **Dennis** | Test Tab 1 (verify county colors, sorting, data loading). Report issues. | Tab 1 validated |
+| **Daniella** | Update `main.py` with Model 3 + Review PRs. | `main.py` Day 4 running |
 
 ---
 
-## Day 5 — Dashboard Tabs 2 & 3 + Triggers + Testing
+## Day 5 — Dashboard Completion + Triggers
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Build `app/streamlit_app.py` Tab 2 (Dropout Risk Calculator). | Tab 2 working |
-| **Lorenah** | Build `app/streamlit_app.py` Tab 3 (2030 Forecast Charts). | Tab 3 working |
+| **Eve** | Build `app/streamlit_app.py` Tab 2 (Dropout Risk Calculator) — full implementation. | Tab 2 working |
+| **Lorenah** | Build `app/streamlit_app.py` Tab 3 (2030 Forecast Charts) — full implementation. | Tab 3 working |
 | **Verah** | Create `app/trigger_alerts.py` — IIT alert system. | `trigger_alerts.py` |
-| **Naomi** | Create `app/trigger_predictions.py` AND test Tabs 2-3 with sample data. | `trigger_predictions.py`, Tabs 2-3 validated |
-| **Dennis** | Integrate Tabs 2-3 into dashboard, handle cross-tab dependencies. | Dashboard full |
-| **Daniella** | Begin `final_notebook.ipynb` + Prepare deployment checklist. | Final notebook started, checklist ready |
+| **Naomi** | Integrate all 3 tabs, handle cross-tab dependencies + Create `app/trigger_predictions.py`. | Full dashboard, `trigger_predictions.py` |
+| **Dennis** | Test Tabs 2-3 with sample data (risk scores, charts display). Report issues. | Tabs 2-3 validated |
+| **Daniella** | Begin `notebooks/final_notebook.ipynb` + Prepare deployment checklist. | Final notebook started |
 
 ---
 
@@ -197,11 +197,11 @@ hiv-care-gap-ai/
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Run `08_model_evaluation.ipynb` for Model 1 metrics. | Model 1 eval |
-| **Lorenah** | Run `08_model_evaluation.ipynb` for Model 2 metrics. | Model 2 eval |
+| **Lorenah** | Run `08_model_evaluation.ipynb` for Model 2 metrics + Add metrics footer to dashboard. | Model 2 eval, dashboard footer |
 | **Verah** | Run `08_model_evaluation.ipynb` for Model 3 metrics. | Model 3 eval |
-| **Naomi** | Complete `08_model_evaluation.ipynb` — compile all metrics. | Evaluation notebook |
-| **Dennis** | Deploy dashboard to Streamlit Cloud (test deployment). | Test URL |
-| **Daniella** | Test deployed dashboard on 3 browsers + Document issues + Create `presentation/slides.md` outline. | Test report, slides outline |
+| **Naomi** | Deploy dashboard to Streamlit Cloud (test deployment) + Compile all evaluation metrics. | Test URL, evaluation compiled |
+| **Dennis** | Help Verah with Model 3 evaluation (run backtest, verify forecasts). | Support |
+| **Daniella** | Test deployed dashboard on 3 browsers + Create `presentation/slides.md` outline. | Test report, slides outline |
 
 ---
 
@@ -212,35 +212,34 @@ hiv-care-gap-ai/
 | **Eve** | Test `trigger_predictions.py` with dry run. | Trigger tested |
 | **Lorenah** | Test `trigger_alerts.py` with current data. | Alerts tested |
 | **Verah** | Update `README.md` with setup and run instructions. | README complete |
-| **Naomi** | Complete `10_monitoring.ipynb` + Test final deployment URL. | Monitoring notebook, URL validated |
-| **Dennis** | Final deployment to Streamlit Cloud (production). | Live dashboard URL |
-| **Daniella** | Complete `final_notebook.ipynb` with all 3 models and recommendations. | Final notebook ready |
+| **Naomi** | Final deployment to Streamlit Cloud (production) + Complete `final_notebook.ipynb`. | Live dashboard URL, final notebook |
+| **Dennis** | Complete `10_monitoring.ipynb` (documentation for annual updates). | Monitoring notebook |
+| **Daniella** | Review PRs, coordinate final checks. | All PRs merged |
 
 ---
 
-## Day 8 — Presentation Slides + Dashboard Polish
+## Day 8 — Final Dashboard Polish + Documentation + Triggers 
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Create slide content for Model 1 (2-3 slides). | Slides section |
-| **Lorenah** | Create slide content for Model 2 (2-3 slides). | Slides section |
-| **Verah** | Create slide content for Model 3 (2-3 slides). | Slides section |
-| **Naomi** | Create slide content for Data + Methodology + Testing (2-3 slides). | Slides section |
-| **Dennis** | Polish dashboard + Create slide for Dashboard + Deployment. | Dashboard final, slides section |
-| **Daniella** | Assemble all slides into final deck + Create Intro/Conclusion/Recommendation slides. | Slides complete |
+| **Eve** | Run full pipeline on clean environment + Document any issues. | Pipeline verified |
+| **Lorenah** | Polish dashboard (error handling, loading states, tooltips) + Final browser check. | Dashboard final |
+| **Verah** | Review README, ensure all commands work + Final `trigger_alerts.py` test. | README verified, alerts ready |
+| **Naomi** | Final dashboard check on all browsers + mobile + Fix any issues found. | Dashboard verified |
+| **Dennis** | Audit `constants.py` for hard-coded values + Complete `10_monitoring.ipynb`. | `constants.py` final, monitoring done |
+| **Daniella** | Create complete presentation deck (10-12 slides): Title, Problem, Data, Model 1, Model 2, Model 3, Dashboard, Recommendations, Limitations, Conclusion. | Slides complete |
 
 ---
-
 ## Day 9 — Rehearsal + Final Fixes
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Run full pipeline on clean environment. Fix any bugs. | Pipeline verified |
-| **Lorenah** | Test trigger scripts with sample new data. | Triggers verified |
-| **Verah** | Review README, ensure all commands work. | README verified |
-| **Naomi** | Review constants.py for hard-coded values + Time presentation sections. | constants.py final, timing notes |
-| **Dennis** | Final dashboard check on all browsers + mobile. | Dashboard verified |
-| **Daniella** | Lead 1-hour full presentation rehearsal + Note fixes needed. | Team ready, fix list |
+| **Eve** | Test `trigger_predictions.py` with dry run + Practice Model 1 presentation. | Trigger tested, ready to present |
+| **Lorenah** | Test trigger scripts with sample new data + Practice Model 2 presentation. | Triggers verified, ready to present |
+| **Verah** | Verify README commands work + Practice Model 3 presentation. | README verified, ready to present |
+| **Naomi** | Final dashboard check + Practice Data + Methodology presentation. | Dashboard verified, ready to present |
+| **Dennis** | Final deployment check + Practice Dashboard + Deployment presentation. | Dashboard live, ready to present |
+| **Daniella** | Lead 1-hour full presentation rehearsal + Polish slides based on feedback + Time each section. | Team ready, slides final, timing notes |
 
 ---
 
@@ -305,8 +304,8 @@ Each person has their own distinct task each day. No dependencies between people
 | 5 | Support dashboard | Support dashboard | `app/trigger_alerts.py` | `app/trigger_predictions.py` | Complete dashboard Tabs 2-3 | Start `final_notebook.ipynb` |
 | 6 | Run `08_model_evaluation.ipynb` (Model 1) | Run `08_model_evaluation.ipynb` (Model 2) | Run `08_model_evaluation.ipynb` (Model 3) | Compile all metrics | Add metrics footer to dashboard | Create `presentation/slides.md` outline |
 | 7 | Test `trigger_predictions.py` | Test `trigger_alerts.py` | Update `README.md` | Complete `10_monitoring.ipynb` | Deploy dashboard (test) | Complete `final_notebook.ipynb` |
-| 8 | Create Model 1 slides | Create Model 2 slides | Create Model 3 slides | Create Data + Methodology slides | Polish dashboard | Assemble all slides |
-| 9 | Run full pipeline on clean environment | Test triggers with sample data | Verify README commands | Audit `constants.py` | Final deployment | Lead rehearsal |
+| 8 | Pipeline test | Polish dashboard | Verify README | Browser check + fixes | Audit constants + monitoring | Create slides |
+| 9 | Practice M1 + dry run | Practice M2 + trigger test | Practice M3 + README verify | Practice Data + final check | Practice Deployment + audit | Lead rehearsal + polish slides |
 | 10 | Present | Present | Present | Present | Present | Submit all |
 
 ** COMPLETELY PARALLEL — NO DEPENDENCIES**
@@ -347,13 +346,13 @@ Each person has their own distinct task each day. No dependencies between people
 
 | Day | Eve | Lorenah | Verah | Naomi | Dennis | Daniella |
 |-----|-----|---------|-------|-------|--------|----------|
-| 1 | `02_nsdcc_cleaning.ipynb` + `src/nsdcc_cleaner.py` | `03_dhs_cleaning.ipynb` + `src/dhs_cleaner.py` | `src/feature_engineering.py` | `constants.py` | `src/utils.py` | `main.py` |
-| 2 | `scripts/merge_data.py` | `06_model_2_dropout_prediction.ipynb` (Logistic Regression) | `04_feature_engineering.ipynb` | `src/feature_engineering.py` | `src/evaluation.py` | `main.py` |
-| 3 | `scripts/train_model1.py` | `06_model_2_dropout_prediction.ipynb` (XGBoost) | `07_model_3_forecasting.ipynb` (BAU) | `05_model_1_county_clustering.ipynb` | `src/model_training.py` | `main.py` |
-| 4 | `scripts/train_model3.py` | `scripts/train_model2.py` | `07_model_3_forecasting.ipynb` (Scenario B) | `src/forecasting.py` | `app/streamlit_app.py` (Tab 1) | `main.py` |
-| 5 | Support dashboard | Support dashboard Tab 2 | `app/trigger_alerts.py` | `app/trigger_predictions.py` | `app/streamlit_app.py` (Tabs 2-3) | `notebooks/final_notebook.ipynb` |
+| 1 | `02_nsdcc_cleaning.ipynb` + `nsdcc_cleaner.py` | `03_dhs_cleaning.ipynb` + `dhs_cleaner.py` | `src/feature_engineering.py` | `constants.py` | `src/utils.py` | `main.py` |
+| 2 | `scripts/merge_data.py` | `06_model_2_dropout_prediction.ipynb` (LR) | `04_feature_engineering.ipynb` + `src/feature_engineering.py` | `05_model_1_county_clustering.ipynb` | `src/evaluation.py` | `main.py` |
+| 3 | `scripts/train_model1.py` | `06_model_2_dropout_prediction.ipynb` (XGB) | `07_model_3_forecasting.ipynb` (BAU) | `src/forecasting.py` | `src/model_training.py` | `main.py` |
+| 4 | `scripts/train_model3.py` | `scripts/train_model2.py` | `07_model_3_forecasting.ipynb` (Scenario B) | `scripts/train_model2.py` + Cloud setup. | `app/streamlit_app.py` (Tab 1) | `main.py` |
+| 5 | Support dashboard | Support dashboard Tab 2 | `app/trigger_alerts.py` | `app/trigger_predictions.py` + Integrate tabs | `app/streamlit_app.py` (Tabs 2-3) | `notebooks/final_notebook.ipynb` |
 | 6 | `08_model_evaluation.ipynb` (Model 1) | `08_model_evaluation.ipynb` (Model 2) | `08_model_evaluation.ipynb` (Model 3) | `08_model_evaluation.ipynb` (compile) | Dashboard metrics footer | `presentation/slides.md` |
 | 7 | Test `trigger_predictions.py` | Test `trigger_alerts.py` | `README.md` | `10_monitoring.ipynb` | Deploy dashboard (test) | `notebooks/final_notebook.ipynb` |
-| 8 | Slides (Model 1) | Slides (Model 2) | Slides (Model 3) | Slides (Data + Methodology) | Dashboard polish | Assemble all slides |
-| 9 | Full pipeline test | Triggers test with sample data | Verify README | Audit `constants.py` | Final deployment | Lead rehearsal |
+| 8 | Pipeline test | Polish dashboard | Verify README | Browser check + fixes | Audit constants + monitoring | Create slides |
+| 9 | Practice M1 + dry run | Practice M2 + trigger test | Practice M3 + README verify | Practice Data + final check | Practice Deployment + audit | Lead rehearsal + polish slides |
 | 10 | Present | Present | Present | Present | Present | Submit all |
