@@ -62,6 +62,19 @@ hiv-care-gap-ai/
 │   │   └── individual_features.csv
 │   │
 │   └── processed/                  ← Empty — will be populated
+│   │   ├── adult_on_art_clean.csv 
+│   │   ├── hts_clean.csv                   
+│   │   ├── vlt_clean.csv                   
+│   │   ├── iit_clean.csv                   
+│   │   ├── individual_features_clean.csv   
+│   │   ├── nsdcc_merged.csv                
+│   │   ├── county_profiles.csv             
+│   │   ├── tier_timeseries.csv             
+│   │   ├── forecast_critical.csv           
+│   │   ├── forecast_high.csv              
+│   │   ├── forecast_moderate.csv          
+│   │   ├── forecast_low.csv               
+│   │   └── forecast_national.csv 
 │
 ├── notebooks/                      ← 11 notebooks total
 │   ├── 01_data_extraction.ipynb              COMPLETE (Naomi)
