@@ -11,10 +11,10 @@ except ImportError:
     # Fallback/Placeholder if constants.py isn't available yet
     COUNTY_NAME_MAP = {}
     TIER_COLORS = {
-        "High": "#D7191C",
-        "Medium": "#FDAE61",
-        "Low": "#ABDDA4",
-        "Minimal": "#2B83BA"
+      "critical": "#C0392B",
+      "High":     "#E67E22",
+      "Moderate": "#f1c408",
+      "Low":      "#27AE60",   
     }
 
 def ensure_dir(file_path: str) -> None:
