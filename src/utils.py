@@ -11,9 +11,9 @@ except ImportError:
     # Fallback/Placeholder if constants.py isn't available yet
     COUNTY_NAME_MAP = {}
     TIER_COLORS = {
-      "critical": "#C0392B",
+      "Critical": "#C0392B",
       "High":     "#E67E22",
-      "Moderate": "#f1c408",
+      "Moderate": "#F1C408",
       "Low":      "#27AE60",   
     }
 
