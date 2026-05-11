@@ -79,7 +79,8 @@ hiv-care-gap-ai/
 ├── src/                            ← Python modules (NOT scripts/)
 │   ├── __init__.py
 │   ├── utils.py                              ← Shared helpers
-│   ├── data_preprocessing.py                 ← Load + clean functions
+│   ├── nsdcc_cleaner.py                      ← Load + clean nsdcc functions
+│   ├── dhs_cleaner.py                        ← Load + clean dhs functions
 │   ├── feature_engineering.py                ← CGI + tier aggregation
 │   ├── model_training.py                     ← KMeans + XGBoost + Prophet
 │   ├── evaluation.py                         ← Metrics functions
@@ -115,16 +116,14 @@ hiv-care-gap-ai/
 
 ## Day 1 — Data Cleaning: NSDCC + DHS (Parallel)
 
-**Starting point:** `01_data_extraction.ipynb` is complete. Raw data is in place.
-
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Complete `02_nsdcc_cleaning.ipynb` (NSDCC cells 1-8): Load 4 NSDCC files, apply `COUNTY_NAME_MAP`, parse MOH codes, reshape wide→long, impute missing values, calculate IIT/VLS/HTS rates. | 4 clean CSVs in `data/processed/` |
-| **Lorenah** | Complete `03_dhs_cleaning.ipynb`: Load `individual_features.csv`, apply DHS code maps from `constants.py`, engineer dropout target, one-hot encode categoricals. | `individual_features_clean.csv` |
-| **Verah** | Update `src/data_preprocessing.py`: Add `load_nsdcc()`, `load_dhs()`, `clean_nsdcc()`, `clean_dhs()` functions. | `data_preprocessing.py` importable |
-| **Naomi** | Review & document: Confirm DHS column names match `constants.py`. Update `XGB_SCALE_POS_WEIGHT` in `constants.py` based on Lorenah's class balance. | `constants.py` updated |
-| **Dennis** | Create `src/utils.py`: Add `standardise_county()`, `get_tier_color()`, `save_csv()`, `load_csv()` helpers. | `utils.py` complete |
-| **Daniella** | Review PRs, merge Day 1 work. Create `main.py` skeleton with function stubs. | `main.py` started |
+| **Eve** | Complete `02_nsdcc_cleaning.ipynb`: Load 4 NSDCC files, strip county suffix, standardise names, rename MOH columns, convert to numeric, impute missing values (county mean → column median), create before/after missing-value heatmaps, validate 47 counties and 0 duplicates, save 4 clean CSVs to `data/processed/`. THEN create `src/nsdcc_cleaner.py` with reusable functions. | 4 clean CSVs, `nsdcc_cleaner.py` |
+| **Lorenah** | Complete `03_dhs_cleaning.ipynb`: Load `individual_features.csv`, map county codes (1-47) to names, decode age/education/wealth/marital/distance columns using constants, impute binary flags with 0 and numeric with median, engineer dropout target (`told_hiv_positive=1` AND `tested_hiv_last_12months=0`), create before/after missing-value heatmap, one-hot encode education and wealth, save to `individual_features_clean.csv`. THEN create `src/dhs_cleaner.py` with reusable functions. | `individual_features_clean.csv`, `dhs_cleaner.py` |
+| **Verah** | Create `src/feature_engineering.py`: Add functions for CGI calculation and tier aggregation. | `feature_engineering.py` |
+| **Naomi** | Review DHS class balance from Lorenah's output (Cell 17). Update `XGB_SCALE_POS_WEIGHT` in `constants.py`. | `constants.py` updated |
+| **Dennis** | Create `src/utils.py`: Add `standardise_county()`, `get_tier_color()`, `save_csv()`, `load_csv()` helpers. | `utils.py` |
+| **Daniella** | Review PRs, merge Day 1 work. Create `main.py` skeleton. | `main.py` |
 
 ---
 
@@ -335,7 +334,7 @@ Each person has their own distinct task each day. No dependencies between people
 
 | Day | Eve | Lorenah | Verah | Naomi | Dennis | Daniella |
 |-----|-----|---------|-------|-------|--------|----------|
-| 1 | `02_nsdcc_cleaning.ipynb` | `03_dhs_cleaning.ipynb` | `src/data_preprocessing.py` | `constants.py` | `src/utils.py` | `main.py` |
+| 1 | `02_nsdcc_cleaning.ipynb` + `src/nsdcc_cleaner.py` | `03_dhs_cleaning.ipynb` + `src/dhs_cleaner.py` | `src/feature_engineering.py` | `constants.py` | `src/utils.py` | `main.py` |
 | 2 | `scripts/merge_data.py` | `06_model_2_dropout_prediction.ipynb` (Logistic Regression) | `04_feature_engineering.ipynb` | `src/feature_engineering.py` | `src/evaluation.py` | `main.py` |
 | 3 | `scripts/train_model1.py` | `06_model_2_dropout_prediction.ipynb` (XGBoost) | `07_model_3_forecasting.ipynb` (BAU) | `05_model_1_county_clustering.ipynb` | `src/model_training.py` | `main.py` |
 | 4 | `scripts/train_model3.py` | `scripts/train_model2.py` | `07_model_3_forecasting.ipynb` (Scenario B) | `src/forecasting.py` | `app/streamlit_app.py` (Tab 1) | `main.py` |
