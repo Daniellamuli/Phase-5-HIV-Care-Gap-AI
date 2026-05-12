@@ -1,0 +1,19 @@
+{
+  "model": "LogisticRegression",
+  "auc_roc": 0.7248,
+  "recall": 0.4,
+  "precision": 0.0013,
+  "f1": 0.0025,
+  "tn": 4861,
+  "fp": 1566,
+  "fn": 3,
+  "tp": 2,
+  "features_encoded": [
+    "age_group",
+    "marital_status",
+    "distance_to_facility",
+    "worked_last_12months",
+    "currently_in_union"
+  ],
+  "total_features": 18
+}
