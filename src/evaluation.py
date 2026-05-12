@@ -10,13 +10,13 @@ def calculate_silhouette_score(data, labels):
     Args:
         data (DataFrame/Array): The scaled features used for clustering 
                                (e.g., iit_rate, vls_rate, art_coverage).
-        labels (Series/Array): The cluster labels (0, 1, 2, 3) assigned by KMeans.
+    
         
     Returns:
         float: The mean silhouette coefficient of all samples.
     """
     # Calculate the score
-    score = silhouette_score(data, labels, random_state=KMEANS_RANDOM_STATE)
+    score = silhouette_score(data, labels)
     
     print(f"--- Model 1 Evaluation ---")
     print(f"Silhouette Score: {score:.4f}")
