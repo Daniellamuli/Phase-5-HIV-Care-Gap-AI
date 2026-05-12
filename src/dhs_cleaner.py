@@ -1,5 +1,3 @@
-# src/dhs_cleaner.py
-
 import pandas as pd
 import numpy as np
 import sys
@@ -59,51 +57,50 @@ class DHSCleaner:
         else:
             print(f"Warning: {county_col} not found in dataframe")
 
-    # In src/dhs_cleaner.py, replace decode_demographics method with:
 
     def decode_demographics(self) -> None:
         """
         Decode age, education, wealth, marital status, distance, work, and union using maps from constants
         """
-    # Columns that need mapping (numeric codes → labels)
-    numeric_mappings = {
-        "age_group": self.constants.DHS_AGE_GROUP_MAP,      # 1-7 → "15-19", "20-24", etc.
-        "marital_status": self.constants.DHS_MARITAL_MAP,   # 0-5 → "Never married", "Married", etc.
-        "education_level": self.constants.DHS_EDUCATION_MAP,
-        "wealth_index": self.constants.DHS_WEALTH_MAP,
-        "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
-    }
-    
-    # Apply mappings for numeric columns
-    for col, mapping in numeric_mappings.items():
-        if col in self.clean_df.columns:
-            # Only apply if column is numeric
-            if self.clean_df[col].dtype in ['int64', 'float64']:
-                self.clean_df[col] = self.clean_df[col].map(mapping)
-                print(f"Decoded {col} (numeric → labels)")
-                # Show sample of decoded values
-                sample_values = self.clean_df[col].dropna().unique()[:3]
-                print(f"  Sample: {sample_values}")
-            else:
-                print(f"Note: {col} is already decoded, skipping")
-    
-    # Handle work status
-    if "worked_last_12months" in self.clean_df.columns:
-        if self.clean_df["worked_last_12months"].isnull().all():
-            self.clean_df["worked_last_12months"] = "No"
-            print("Filled worked_last_12months with 'No' (100% missing)")
-        elif self.clean_df["worked_last_12months"].dtype in ['int64', 'float64']:
-            self.clean_df["worked_last_12months"] = self.clean_df["worked_last_12months"].map(self.constants.DHS_WORKED_MAP)
-            print("Decoded worked_last_12months")
-    
-    # Handle union status
-    if "currently_in_union" in self.clean_df.columns:
-        if self.clean_df["currently_in_union"].isnull().all():
-            self.clean_df["currently_in_union"] = "Not in union"
-            print("Filled currently_in_union with 'Not in union' (100% missing)")
-        elif self.clean_df["currently_in_union"].dtype in ['int64', 'float64']:
-            self.clean_df["currently_in_union"] = self.clean_df["currently_in_union"].map(self.constants.DHS_UNION_MAP)
-            print("Decoded currently_in_union")
+        # Columns that need mapping (numeric codes → labels)
+        numeric_mappings = {
+            "age_group": self.constants.DHS_AGE_GROUP_MAP,      # 1-7 → "15-19", "20-24", etc.
+            "marital_status": self.constants.DHS_MARITAL_MAP,   # 0-5 → "Never married", "Married", etc.
+            "education_level": self.constants.DHS_EDUCATION_MAP,
+            "wealth_index": self.constants.DHS_WEALTH_MAP,
+            "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
+        }
+        
+        # Apply mappings for numeric columns
+        for col, mapping in numeric_mappings.items():
+            if col in self.clean_df.columns:
+                # Only apply if column is numeric
+                if self.clean_df[col].dtype in ['int64', 'float64']:
+                    self.clean_df[col] = self.clean_df[col].map(mapping)
+                    print(f"Decoded {col} (numeric → labels)")
+                    # Show sample of decoded values
+                    sample_values = self.clean_df[col].dropna().unique()[:3]
+                    print(f"  Sample: {sample_values}")
+                else:
+                    print(f"Note: {col} is already decoded, skipping")
+        
+        # Handle work status
+        if "worked_last_12months" in self.clean_df.columns:
+            if self.clean_df["worked_last_12months"].isnull().all():
+                self.clean_df["worked_last_12months"] = "No"
+                print("Filled worked_last_12months with 'No' (100% missing)")
+            elif self.clean_df["worked_last_12months"].dtype in ['int64', 'float64']:
+                self.clean_df["worked_last_12months"] = self.clean_df["worked_last_12months"].map(self.constants.DHS_WORKED_MAP)
+                print("Decoded worked_last_12months")
+        
+        # Handle union status
+        if "currently_in_union" in self.clean_df.columns:
+            if self.clean_df["currently_in_union"].isnull().all():
+                self.clean_df["currently_in_union"] = "Not in union"
+                print("Filled currently_in_union with 'Not in union' (100% missing)")
+            elif self.clean_df["currently_in_union"].dtype in ['int64', 'float64']:
+                self.clean_df["currently_in_union"] = self.clean_df["currently_in_union"].map(self.constants.DHS_UNION_MAP)
+                print("Decoded currently_in_union")
 
     def impute_binary_flags(self) -> None:
         """
