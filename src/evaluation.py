@@ -83,3 +83,46 @@ def classification_metrics(y_true, y_pred, y_prob):
         "precision": precision,
         "f1_score": f1
     }
+
+## forecast_errors() returning MAE and RMSE
+
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+def forecast_errors(y_true, y_pred):
+    """
+    Evaluates Model 3 (2030 Time-Series Forecasting).
+    
+    Args:
+        y_true: Historical actual values (e.g., actual iit_count).
+        y_pred: Model predictions for the same historical period (yhat).
+        
+    Returns:
+        dict: A dictionary containing MAE and RMSE.
+    """
+    # Calculate Core Errors
+    mae = mean_absolute_error(y_true, y_pred)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    
+    # Calculate MAPE for business context (Mean Absolute Percentage Error)
+    # Using a small epsilon to avoid division by zero if data is sparse
+    mape = np.mean(np.abs((y_true - y_pred) / (y_true + 1e-9))) * 100
+
+    print(f"\n--- Model 3 Evaluation: Forecasting Accuracy ---")
+    print(f"Mean Absolute Error (MAE):      {mae:.2f}")
+    print(f"Root Mean Square Error (RMSE):  {rmse:.2f}")
+    print(f"Mean Absolute % Error (MAPE):   {mape:.2f}%")
+    
+    if mape < 10:
+        print("Interpretation: Highly accurate forecast.")
+    elif mape < 25:
+        print("Interpretation: Good forecast; reliable for strategic planning.")
+    else:
+        print("Interpretation: High variance; consider adding holidays or changepoints.")
+
+    return {
+        "mae": mae,
+        "rmse": rmse,
+        "mape": mape
+    }
