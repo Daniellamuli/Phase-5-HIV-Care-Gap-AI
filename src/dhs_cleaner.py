@@ -57,7 +57,6 @@ class DHSCleaner:
         else:
             print(f"Warning: {county_col} not found in dataframe")
 
-
     def decode_demographics(self) -> None:
         """
         Decode age, education, wealth, marital status, distance, work, and union using maps from constants
@@ -76,7 +75,11 @@ class DHSCleaner:
             if col in self.clean_df.columns:
                 # Only apply if column is numeric
                 if self.clean_df[col].dtype in ['int64', 'float64']:
-                    self.clean_df[col] = self.clean_df[col].map(mapping)
+                    # Special handling for distance_to_facility - ensure integer for mapping
+                    if col == 'distance_to_facility':
+                        self.clean_df[col] = self.clean_df[col].astype('Int64').map(mapping)
+                    else:
+                        self.clean_df[col] = self.clean_df[col].map(mapping)
                     print(f"Decoded {col} (numeric → labels)")
                     # Show sample of decoded values
                     sample_values = self.clean_df[col].dropna().unique()[:3]
@@ -128,10 +131,10 @@ class DHSCleaner:
         Parameters:
         -----------
         numeric_cols : List[str]
-            List of column names to impute (default: ['num_sexual_partners', 'anc_visits'])
+            List of column names to impute (default: ['num_sexual_partners'])
         """
         if numeric_cols is None:
-            numeric_cols = ["num_sexual_partners", "anc_visits"]
+            numeric_cols = ["num_sexual_partners"]  # anc_visits removed - column doesn't exist
 
         for col in numeric_cols:
             if col in self.clean_df.columns:
