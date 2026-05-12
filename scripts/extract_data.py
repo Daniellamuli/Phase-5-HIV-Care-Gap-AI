@@ -5,19 +5,21 @@ Production version of: notebooks/01_data_extraction.ipynb
 Step 1 in main.py pipeline. Read-only — saves nothing.
 
 Real file structures (confirmed, do not change):
-  ART (47x11) : Period + County col, values "Baringo County"
-  HTS (47x7)  : Period + County col, values "Baringo County"
-  VLT (47x7)  : County col ONLY, no Period, values "Baringo"
-  IIT (9x13)  : Region col ONLY, no Period, 9 MOH regions
-  DHS         : integer county codes 1-47
+  ART     (47x11) : Period + County col, values "Baringo County"
+  HTS     (47x7)  : Period + County col, values "Baringo County"
+  HTS_POS (47x~)  : Period + County col, values "Baringo County" — same structure as HTS
+  VLT     (47x7)  : County col ONLY, no Period, values "Baringo"
+  IIT     (9x13)  : Region col ONLY, no Period, 9 MOH regions
+  DHS             : integer county codes 1-47
 """
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 from constants import (
-    ADULT_ART_FILE, HTS_FILE, VLT_FILE, IIT_FILE, DHS_REDUCED,
+    ADULT_ART_FILE, HTS_FILE, HTS_POSITIVE_FILE, VLT_FILE, IIT_FILE, DHS_REDUCED,
     ART_COUNTY_COL, ART_PERIOD_COL, ART_COUNTY_SUFFIX,
     HTS_COUNTY_COL, HTS_PERIOD_COL, HTS_COUNTY_SUFFIX,
+    HTS_POS_COUNTY_COL, HTS_POS_PERIOD_COL, HTS_POS_COUNTY_SUFFIX,
     VLT_COUNTY_COL, VLT_HAS_PERIOD,
     IIT_REGION_COL, IIT_HAS_PERIOD,
     COUNTY_NAME_MAP, DHS_COUNTY_MAP,
@@ -95,10 +97,11 @@ def extract_all():
 
     # Load
     print("\n  Loading files:")
-    art = load_with_period(ADULT_ART_FILE, ART_PERIOD_COL, "ART")
-    hts = load_with_period(HTS_FILE,       HTS_PERIOD_COL, "HTS")
-    vlt = load_snapshot(VLT_FILE,          VLT_COUNTY_COL, "VLT")
-    iit = load_iit(IIT_FILE,              IIT_REGION_COL, "IIT")
+    art     = load_with_period(ADULT_ART_FILE,    ART_PERIOD_COL, "ART")
+    hts     = load_with_period(HTS_FILE,          HTS_PERIOD_COL, "HTS")
+    hts_pos = load_with_period(HTS_POSITIVE_FILE, HTS_POS_PERIOD_COL, "HTS+")
+    vlt     = load_snapshot(VLT_FILE,             VLT_COUNTY_COL, "VLT")
+    iit     = load_iit(IIT_FILE,                  IIT_REGION_COL, "IIT")
 
     if not os.path.exists(DHS_REDUCED):
         raise FileNotFoundError(f"FILE NOT FOUND: {DHS_REDUCED}")
@@ -106,22 +109,24 @@ def extract_all():
     print(f"  {'DHS':<6} {dhs.shape[0]:>5} rows x {dhs.shape[1]:>3} cols")
 
     # Summary
-    print(f"\n  {'File':<25} {'Rows':>5} {'Cols':>5}  {'Period':>8}  Format")
-    print(f"  {'-'*70}")
-    print(f"  {'Adult_on_ART.xlsx':<25} {art.shape[0]:>5} {art.shape[1]:>5}  {'Yes':>8}  'Baringo County' → strip suffix")
-    print(f"  {'Adult_on_HTS.xlsx':<25} {hts.shape[0]:>5} {hts.shape[1]:>5}  {'Yes':>8}  'Baringo County' → strip suffix")
-    print(f"  {'VLT.xlsx':<25} {vlt.shape[0]:>5} {vlt.shape[1]:>5}  {'No':>8}  'Baringo' → clean")
-    print(f"  {'IIT.xlsx':<25} {iit.shape[0]:>5} {iit.shape[1]:>5}  {'No':>8}  9 regions → expand to 47 counties")
-    print(f"  {'individual_features.csv':<25} {dhs.shape[0]:>5} {dhs.shape[1]:>5}  {'N/A':>8}  integers 1-47")
+    print(f"\n  {'File':<28} {'Rows':>5} {'Cols':>5}  {'Period':>8}  Format")
+    print(f"  {'-'*75}")
+    print(f"  {'Adult_on_ART.xlsx':<28} {art.shape[0]:>5} {art.shape[1]:>5}  {'Yes':>8}  'Baringo County' → strip suffix")
+    print(f"  {'Adult_on_HTS.xlsx':<28} {hts.shape[0]:>5} {hts.shape[1]:>5}  {'Yes':>8}  'Baringo County' → strip suffix")
+    print(f"  {'HTS_Positive.xlsx':<28} {hts_pos.shape[0]:>5} {hts_pos.shape[1]:>5}  {'Yes':>8}  'Baringo County' → strip suffix")
+    print(f"  {'VLT.xlsx':<28} {vlt.shape[0]:>5} {vlt.shape[1]:>5}  {'No':>8}  'Baringo' → clean")
+    print(f"  {'IIT.xlsx':<28} {iit.shape[0]:>5} {iit.shape[1]:>5}  {'No':>8}  9 regions → expand to 47 counties")
+    print(f"  {'individual_features.csv':<28} {dhs.shape[0]:>5} {dhs.shape[1]:>5}  {'N/A':>8}  integers 1-47")
 
     # Validate maps
     print("\n  Validating mappings:")
     errors = 0
-    errors += validate_county_map(art[ART_COUNTY_COL].dropna().unique(), "ART", ART_COUNTY_SUFFIX)
-    errors += validate_county_map(hts[HTS_COUNTY_COL].dropna().unique(), "HTS", HTS_COUNTY_SUFFIX)
-    errors += validate_county_map(vlt[VLT_COUNTY_COL].dropna().unique(), "VLT")
-    errors += validate_region_map(iit[IIT_REGION_COL].dropna().unique(), "IIT")
-    errors += validate_dhs_codes(dhs["county"].dropna().unique(),         "DHS")
+    errors += validate_county_map(art[ART_COUNTY_COL].dropna().unique(),         "ART",  ART_COUNTY_SUFFIX)
+    errors += validate_county_map(hts[HTS_COUNTY_COL].dropna().unique(),         "HTS",  HTS_COUNTY_SUFFIX)
+    errors += validate_county_map(hts_pos[HTS_POS_COUNTY_COL].dropna().unique(), "HTS+", HTS_POS_COUNTY_SUFFIX)
+    errors += validate_county_map(vlt[VLT_COUNTY_COL].dropna().unique(),         "VLT")
+    errors += validate_region_map(iit[IIT_REGION_COL].dropna().unique(),         "IIT")
+    errors += validate_dhs_codes(dhs["county"].dropna().unique(),                 "DHS")
 
     all_in_regions = [c for cs in REGION_TO_COUNTIES.values() for c in cs]
     if len(all_in_regions) != 47:
@@ -138,7 +143,7 @@ def extract_all():
         print(f"  {errors} issue(s) found — fix constants.py before cleaning.")
     print()
 
-    return {"art": art, "hts": hts, "vlt": vlt, "iit": iit, "dhs": dhs}
+    return {"art": art, "hts": hts, "hts_pos": hts_pos, "vlt": vlt, "iit": iit, "dhs": dhs}
 
 if __name__ == "__main__":
     extract_all()
