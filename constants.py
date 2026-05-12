@@ -3,11 +3,12 @@
 # Built from actual file inspection. Do not guess column names.
 #
 # REAL FILE STRUCTURES:
-#   ART (47x11): Period, County, MOH cols..., Total, Total_Males, Total_Females
-#   HTS (47x7) : Period, County, MOH cols..., Total, Total_Males, Total_Females
-#   VLT (47x7) : County only (NO Period), Valid VL / Suppressed by age/sex
-#   IIT (9x13) : Region only (NO Period), 9 regions, IIT counts + percentages
-#   DHS        : county integers 1-47, already reduced
+#   ART      (47x11): Period, County, MOH cols..., Total, Total_Males, Total_Females
+#   HTS      (47x7) : Period, County, MOH cols..., Total, Total_Males, Total_Females
+#   HTS_POS  (47x~) : Period, County, MOH 731_HTS_Positive cols..., Total, Total_Males, Total_Females
+#   VLT      (47x7) : County only (NO Period), Valid VL / Suppressed by age/sex
+#   IIT      (9x13) : Region only (NO Period), 9 regions, IIT counts + percentages
+#   DHS             : county integers 1-47, already reduced
 # =============================================================
 
 import os
@@ -18,15 +19,17 @@ PROCESSED_DIR = os.path.join(ROOT_DIR, "data", "processed")
 MODELS_DIR    = os.path.join(ROOT_DIR, "models")
 
 # ── RAW FILES (exact filenames in data/raw/)
-ADULT_ART_FILE = os.path.join(RAW_DIR, "Adult_on_ART.xlsx")
-HTS_FILE       = os.path.join(RAW_DIR, "Adult_on_HTS.xlsx")
-VLT_FILE       = os.path.join(RAW_DIR, "VLT.xlsx")
-IIT_FILE       = os.path.join(RAW_DIR, "IIT.xlsx")
-DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")
+ADULT_ART_FILE    = os.path.join(RAW_DIR, "Adult_on_ART.xlsx")
+HTS_FILE          = os.path.join(RAW_DIR, "Adult_on_HTS.xlsx")
+HTS_POSITIVE_FILE = os.path.join(RAW_DIR, "HTS_Positive.xlsx")   # Tested HIV+ counts
+VLT_FILE          = os.path.join(RAW_DIR, "VLT.xlsx")
+IIT_FILE          = os.path.join(RAW_DIR, "IIT.xlsx")
+DHS_REDUCED       = os.path.join(RAW_DIR, "individual_features.csv")
 
 # ── PROCESSED FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
 HTS_CLEAN    = os.path.join(PROCESSED_DIR, "hts_clean.csv")
+HTS_POS_CLEAN = os.path.join(PROCESSED_DIR, "hts_positive_clean.csv")  # HIV+ counts, merged with HTS for positivity rate
 VLT_CLEAN    = os.path.join(PROCESSED_DIR, "vlt_clean.csv")
 IIT_CLEAN    = os.path.join(PROCESSED_DIR, "iit_clean.csv")
 DHS_CLEAN    = os.path.join(PROCESSED_DIR, "individual_features_clean.csv")
@@ -59,6 +62,11 @@ HTS_COUNTY_COL  = "County"
 HTS_PERIOD_COL  = "Period"
 HTS_COUNTY_SUFFIX = " County"   # same suffix as ART
 
+# HTS_POSITIVE: same structure as HTS — Period + County + age/sex MOH cols + Total
+HTS_POS_COUNTY_COL    = "County"
+HTS_POS_PERIOD_COL    = "Period"
+HTS_POS_COUNTY_SUFFIX = " County"   # same suffix as ART and HTS
+
 # VLT: has County only — NO Period column (single snapshot)
 VLT_COUNTY_COL  = "County"
 VLT_HAS_PERIOD  = False
@@ -87,6 +95,13 @@ HTS_RENAME = {
     "Total_Males":  "hts_tested_males",
     "Total_Females":"hts_tested_females",
 }
+
+HTS_POSITIVE_RENAME = {
+    "Total":        "hts_positive",          # HIV+ count — used to compute hts_positivity_rate
+    "Total_Males":  "hts_positive_males",
+    "Total_Females":"hts_positive_females",
+}
+# hts_positivity_rate = hts_positive / hts_tested  (computed in notebook 02)
 
 VLT_RENAME = {
     "Valid VL <15yrs":       "vlt_valid_under15",
@@ -160,9 +175,10 @@ assert len(_all) == len(set(_all)), "Duplicate county in REGION_TO_COUNTIES"
 # =============================================================
 # CARE GAP INDEX
 # =============================================================
-IIT_WEIGHT    = 0.4
-VLS_WEIGHT    = 0.4
-HTS_WEIGHT    = 0.2
+IIT_WEIGHT    = 0.4   # IIT rate (higher = worse)
+VLS_WEIGHT    = 0.4   # 1 - VLS rate (lower suppression = worse)
+HTS_WEIGHT    = 0.2   # HTS positivity rate — calculable now that HTS_Positive.xlsx is added
+                      # hts_positivity_rate = hts_positive / hts_tested (per county, per period)
 CGI_SCALE_MIN = 0
 CGI_SCALE_MAX = 100
 
