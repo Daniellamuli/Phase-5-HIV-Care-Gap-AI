@@ -77,6 +77,28 @@ class DHSCleaner:
             else:
                 print(f"Warning: {col} not found - skipping")
 
+    def decode_work_and_union(self) -> None:
+        """
+        Decode work status and union status using DHS_WORKED_MAP and DHS_UNION_MAP
+        """
+        # Decode worked_last_12months
+        if "worked_last_12months" in self.clean_df.columns:
+            self.clean_df["worked_last_12months"] = self.clean_df["worked_last_12months"].map(
+                self.constants.DHS_WORKED_MAP
+            )
+            print(f"Decoded worked_last_12months -> values: {self.clean_df['worked_last_12months'].unique()}")
+        else:
+            print("Warning: worked_last_12months not found - skipping")
+        
+        # Decode currently_in_union
+        if "currently_in_union" in self.clean_df.columns:
+            self.clean_df["currently_in_union"] = self.clean_df["currently_in_union"].map(
+                self.constants.DHS_UNION_MAP
+            )
+            print(f"Decoded currently_in_union -> values: {self.clean_df['currently_in_union'].unique()}")
+        else:
+            print("Warning: currently_in_union not found - skipping")
+
     def impute_binary_flags(self) -> None:
         """
         Impute binary flags (ever tested, tested last 12m, told positive, has insurance) with 0
