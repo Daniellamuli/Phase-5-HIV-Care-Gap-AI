@@ -324,6 +324,23 @@ DHS_WEALTH_MAP     = {1:"Poorest",2:"Poorer",3:"Middle",4:"Richer",5:"Richest"}
 DHS_MARITAL_MAP    = {0:"Never married",1:"Married",2:"Living together",3:"Widowed",4:"Divorced",5:"Separated"}
 DHS_DISTANCE_MAP   = {0:"<1 km",1:"1-2 km",2:"2-5 km",3:"5-10 km",4:"10+ km",998:"Unknown"}
 
+# DHS WORKED LAST 12 MONTHS MAP (v731)
+
+DHS_WORKED_MAP = {
+    0: "No",
+    1: "Yes",
+    2: "Currently working",
+    3: "Have a job but not currently working",
+}
+
+# DHS CURRENTLY IN UNION MAP (v502)
+# 0 = Not in union, 1 = Currently in union, 2 = Formerly in union
+DHS_UNION_MAP = {
+    0: "Not in union",
+    1: "Currently in union",
+    2: "Formerly in union",
+}
+
 # =============================================================
 # HELPERS
 # =============================================================
