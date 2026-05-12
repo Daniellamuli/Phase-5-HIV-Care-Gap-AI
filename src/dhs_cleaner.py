@@ -60,23 +60,24 @@ class DHSCleaner:
 
     def decode_demographics(self) -> None:
         """
-        Decode age, education, wealth, marital status using maps from constants
+        Decode age, education, wealth, marital status, distance, work, and union using maps from constants
         """
         mappings = {
-            "age_group": self.constants.DHS_AGE_GROUP_MAP,
-            "education_level": self.constants.DHS_EDUCATION_MAP,
-            "wealth_index": self.constants.DHS_WEALTH_MAP,
-            "marital_status": self.constants.DHS_MARITAL_MAP,
-            "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
-        }
+        "age_group": self.constants.DHS_AGE_GROUP_MAP,
+        "education_level": self.constants.DHS_EDUCATION_MAP,
+        "wealth_index": self.constants.DHS_WEALTH_MAP,
+        "marital_status": self.constants.DHS_MARITAL_MAP,
+        "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
+        "worked_last_12months": self.constants.DHS_WORKED_MAP,
+        "currently_in_union": self.constants.DHS_UNION_MAP,
+    }
 
-        for col, mapping in mappings.items():
-            if col in self.clean_df.columns:
-                self.clean_df[col] = self.clean_df[col].map(mapping)
-                print(f"Decoded {col}")
-            else:
-                print(f"Warning: {col} not found - skipping")
-
+    for col, mapping in mappings.items():
+        if col in self.clean_df.columns:
+            self.clean_df[col] = self.clean_df[col].map(mapping)
+            print(f"Decoded {col}")
+        else:
+            print(f"Warning: {col} not found - skipping")
     def decode_work_and_union(self) -> None:
         """
         Decode work status and union status using DHS_WORKED_MAP and DHS_UNION_MAP
