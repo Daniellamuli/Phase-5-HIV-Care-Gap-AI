@@ -1,4 +1,3 @@
-
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -27,7 +26,8 @@ from constants import (
     IIT_WEIGHT,
     VLS_WEIGHT,
     HTS_WEIGHT,
-    CGI_SCALE_MAX
+    CGI_SCALE_MAX,
+    KMEANS_FEATURES,  # ADDED: for validation
 )
 
 # ============================================================
@@ -147,6 +147,43 @@ def calculate_care_gap_index(df):
     return df
 
 # ============================================================
+# ART COVERAGE (ADDED)
+# ============================================================
+
+def calculate_art_coverage(df):
+    """
+    Calculate ART coverage rate per county per period.
+
+    Returns
+    -------
+    pd.DataFrame
+        With new column 'art_coverage'
+    """
+    df = df.copy()
+
+    if "adults_on_art" not in df.columns:
+        raise ValueError(
+            "Column 'adults_on_art' not found. "
+            "Cannot calculate ART coverage."
+        )
+
+    # Use PLHIV estimates if available, otherwise population proxy
+    if "plhiv_estimate" in df.columns:
+        df["art_coverage"] = (
+            df["adults_on_art"] / df["plhiv_estimate"]
+        ).clip(0, 1).fillna(0)
+    elif "population" in df.columns:
+        df["art_coverage"] = (
+            df["adults_on_art"] / df["population"]
+        ).clip(0, 1).fillna(0)
+        print("  WARNING: ART coverage using population (proxy)")
+    else:
+        print("  WARNING: No denominator for ART coverage. Using placeholder 0.5")
+        df["art_coverage"] = 0.5
+
+    return df
+
+# ============================================================
 # COUNTY PROFILES
 # ============================================================
 
@@ -184,6 +221,7 @@ def build_county_profiles(df, save=True):
         "iit_rate",
         "vls_rate_adult",
         "hts_positivity_rate",
+        "art_coverage",                    # ADDED
         "iit_rate_yoy_change",
         "vls_rate_yoy_change",
         "care_gap_index"
@@ -245,7 +283,7 @@ def build_tier_timeseries(df, save=True):
         )
         .agg({
             "iit_rate": "mean",
-            "vls_rate": "mean",
+            "vls_rate_adult": "mean",      # FIXED: was 'vls_rate'
             "care_gap_index": "mean"
         })
         .reset_index()
@@ -260,16 +298,15 @@ def build_tier_timeseries(df, save=True):
 
     return tier_ts
 
-
 # ============================================================
 # FULL FEATURE ENGINEERING PIPELINE
 # ============================================================
 
-def run_feature_engineering(df):
+def run_feature_engineering(df, save=True):
     """
     Full reusable feature engineering pipeline."""
     df = df.copy()
-    
+   
     # Create HTS positivity rate if missing
     if "hts_positivity_rate" not in df.columns:
         if "hts_positive" in df.columns and "hts_tested" in df.columns:
@@ -280,13 +317,27 @@ def run_feature_engineering(df):
             raise ValueError(
                 "Missing columns 'hts_positive' and/or 'hts_tested'"
             )
-    
+   
     # YoY features
     df = engineer_yoy_features(df)
-    
+   
     # Care Gap Index
     df = calculate_care_gap_index(df)
-    
+   
+    # ART coverage (ADDED)
+    df = calculate_art_coverage(df)
+   
+    # Validate Model 1 features (ADDED)
+    missing = [col for col in KMEANS_FEATURES if col not in df.columns]
+    if missing:
+        print(f"  WARNING: Model 1 missing features: {missing}")
+    else:
+        print(f"  OK: All Model 1 features present")
+   
+    # Build and save county profiles
+    if save:
+        build_county_profiles(df, save=True)
+   
     return df
 
 if __name__ == "__main__":
