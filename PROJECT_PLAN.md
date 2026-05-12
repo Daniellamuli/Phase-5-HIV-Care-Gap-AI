@@ -20,13 +20,14 @@
 ---
 ## Data Sources
 
-We have **5 raw files** from two sources:
+We have **6 raw files** from two sources:
 
-### NSDCC (National Syndemic Diseases Control Council) — 4 files
+### NSDCC (National Syndemic Diseases Control Council) — 5 files
 | File | Description |
 |------|-------------|
 | `Adult_on_ART.xlsx` | Adults currently on antiretroviral therapy, by county and period |
 | `Adult_on_HTS.xlsx` | HIV testing services (tested counts + positive results) |
+| `HTS_Positive.xlsx` | HIV testing services (positive results) |
 | `IIT.xlsx` | Interruption in treatment (patients who missed ART by 28+ days) |
 | `VLT.xlsx` | Viral load testing (tested counts + suppressed counts) |
 
@@ -54,20 +55,22 @@ We have **5 raw files** from two sources:
 hiv-care-gap-ai/
 │
 ├── data/
-│   ├── raw/                         ← All 5 files present
+│   ├── raw/                         ← All 6 files present
 │   │   ├── Adult_on_ART.xlsx
 │   │   ├── Adult_on_HTS.xlsx
 │   │   ├── IIT.xlsx
+│   │   ├── HTS_Positive.xlsx
 │   │   ├── VLT.xlsx
 │   │   └── individual_features.csv
 │   │
 │   └── processed/                  ← Empty — will be populated
 │   │   ├── adult_on_art_clean.csv 
-│   │   ├── hts_clean.csv                   
+│   │   ├── hts_clean.csv   
+│   │   ├── hts_positive_clean.csv                   
 │   │   ├── vlt_clean.csv                   
 │   │   ├── iit_clean.csv                   
 │   │   ├── individual_features_clean.csv   
-│   │   ├── nsdcc_merged.csv                
+│   │   ├── nsdcc_clean.csv                
 │   │   ├── county_profiles.csv             
 │   │   ├── tier_timeseries.csv             
 │   │   ├── forecast_critical.csv           
@@ -131,7 +134,7 @@ hiv-care-gap-ai/
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Complete `02_nsdcc_cleaning.ipynb`: Load 4 NSDCC files, strip county suffix, standardise names, rename MOH columns, convert to numeric, impute missing values (county mean → column median), create before/after missing-value heatmaps, validate 47 counties and 0 duplicates, save 4 clean CSVs to `data/processed/`. THEN create `src/nsdcc_cleaner.py` with reusable functions. | 4 clean CSVs, `nsdcc_cleaner.py` |
+| **Eve** | Complete `02_nsdcc_cleaning.ipynb`: Load 5 NSDCC files, strip county suffix, standardise names, rename MOH columns, convert to numeric, impute missing values (county mean → column median), create before/after missing-value heatmaps, validate 47 counties and 0 duplicates, save 5 clean CSVs to `data/processed/`. THEN create `src/nsdcc_cleaner.py` with reusable functions. | 5 clean CSVs, `nsdcc_cleaner.py` |
 | **Lorenah** | Complete `03_dhs_cleaning.ipynb`: Load `individual_features.csv`, map county codes (1-47) to names, decode age/education/wealth/marital/distance columns using constants, impute binary flags with 0 and numeric with median, engineer dropout target (`told_hiv_positive=1` AND `tested_hiv_last_12months=0`), create before/after missing-value heatmap, one-hot encode education and wealth, save to `individual_features_clean.csv`. THEN create `src/dhs_cleaner.py` with reusable functions. | `individual_features_clean.csv`, `dhs_cleaner.py` |
 | **Verah** | Create `src/feature_engineering.py`: Add functions for CGI calculation and tier aggregation. | `feature_engineering.py` |
 | **Naomi** | Review DHS class balance from Lorenah's output. Update `XGB_SCALE_POS_WEIGHT` in `constants.py`. | `constants.py` updated |
@@ -144,7 +147,7 @@ hiv-care-gap-ai/
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Create `scripts/merge_data.py`: Merge 4 clean NSDCC CSVs on county + period → `nsdcc_merged.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_merged.csv` |
+| **Eve** | Create `scripts/merge_data.py`: Merge 5 clean NSDCC CSVs on county + period → `nsdcc_clean.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_clean.csv` |
 | **Lorenah** | Begin `06_model_2_dropout_prediction.ipynb`: Load `individual_features_clean.csv`, split data, train Logistic Regression baseline. Document AUC-ROC, Recall. | LR baseline metrics |
 | **Verah** | Complete `04_feature_engineering.ipynb` AND add reusable functions to `src/feature_engineering.py`. Compute IIT yoy change, VLS yoy change, Engineer Care Gap Index, build county_profiles.csv and tier_timeseries.csv. | `county_profiles.csv`, `tier_timeseries.csv`, `feature_engineering.py` |
 | **Naomi** | Complete `05_model_1_county_clustering.ipynb`: KMeans clustering, silhouette score, assign tier labels, save model. | `kmeans_county_tiers.pkl` |
