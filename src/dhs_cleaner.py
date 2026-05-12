@@ -40,10 +40,11 @@ class DHSCleaner:
             Loaded dataframe
         """
         self.raw_df = pd.read_csv(filepath)
-        self.clean_df = self.raw_df.copy()
-        # Strip whitespace to prevent mapping failures
+        # Strip whitespace from column names
         self.raw_df.columns = self.raw_df.columns.str.strip()
+        self.clean_df = self.raw_df.copy()
         print(f"Loaded {len(self.raw_df)} rows with {len(self.raw_df.columns)} columns")
+        print(f"Columns: {self.raw_df.columns.tolist()}")
         return self.raw_df
 
     def decode_county(self, county_col: str = "county") -> None:
@@ -63,42 +64,21 @@ class DHSCleaner:
         Decode age, education, wealth, marital status, distance, work, and union using maps from constants
         """
         mappings = {
-        "age_group": self.constants.DHS_AGE_GROUP_MAP,
-        "education_level": self.constants.DHS_EDUCATION_MAP,
-        "wealth_index": self.constants.DHS_WEALTH_MAP,
-        "marital_status": self.constants.DHS_MARITAL_MAP,
-        "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
-        "worked_last_12months": self.constants.DHS_WORKED_MAP,
-        "currently_in_union": self.constants.DHS_UNION_MAP,
-    }
+            "age_group": self.constants.DHS_AGE_GROUP_MAP,
+            "education_level": self.constants.DHS_EDUCATION_MAP,
+            "wealth_index": self.constants.DHS_WEALTH_MAP,
+            "marital_status": self.constants.DHS_MARITAL_MAP,
+            "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
+            "worked_last_12months": self.constants.DHS_WORKED_MAP,
+            "currently_in_union": self.constants.DHS_UNION_MAP,
+        }
 
-    for col, mapping in mappings.items():
-        if col in self.clean_df.columns:
-            self.clean_df[col] = self.clean_df[col].map(mapping)
-            print(f"Decoded {col}")
-        else:
-            print(f"Warning: {col} not found - skipping")
-    def decode_work_and_union(self) -> None:
-        """
-        Decode work status and union status using DHS_WORKED_MAP and DHS_UNION_MAP
-        """
-        # Decode worked_last_12months
-        if "worked_last_12months" in self.clean_df.columns:
-            self.clean_df["worked_last_12months"] = self.clean_df["worked_last_12months"].map(
-                self.constants.DHS_WORKED_MAP
-            )
-            print(f"Decoded worked_last_12months -> values: {self.clean_df['worked_last_12months'].unique()}")
-        else:
-            print("Warning: worked_last_12months not found - skipping")
-        
-        # Decode currently_in_union
-        if "currently_in_union" in self.clean_df.columns:
-            self.clean_df["currently_in_union"] = self.clean_df["currently_in_union"].map(
-                self.constants.DHS_UNION_MAP
-            )
-            print(f"Decoded currently_in_union -> values: {self.clean_df['currently_in_union'].unique()}")
-        else:
-            print("Warning: currently_in_union not found - skipping")
+        for col, mapping in mappings.items():
+            if col in self.clean_df.columns:
+                self.clean_df[col] = self.clean_df[col].map(mapping)
+                print(f"Decoded {col}")
+            else:
+                print(f"Warning: {col} not found - skipping")
 
     def impute_binary_flags(self) -> None:
         """
