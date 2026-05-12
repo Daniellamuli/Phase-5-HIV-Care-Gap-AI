@@ -67,7 +67,7 @@ hiv-care-gap-ai/
 │   │   ├── vlt_clean.csv                   
 │   │   ├── iit_clean.csv                   
 │   │   ├── individual_features_clean.csv   
-│   │   ├── nsdcc_merged.csv                
+│   │   ├── nsdcc_clean.csv                
 │   │   ├── county_profiles.csv             
 │   │   ├── tier_timeseries.csv             
 │   │   ├── forecast_critical.csv           
@@ -144,7 +144,7 @@ hiv-care-gap-ai/
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Create `scripts/merge_data.py`: Merge 4 clean NSDCC CSVs on county + period → `nsdcc_merged.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_merged.csv` |
+| **Eve** | Create `scripts/merge_data.py`: Merge 4 clean NSDCC CSVs on county + period → `nsdcc_clean.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_clean.csv` |
 | **Lorenah** | Begin `06_model_2_dropout_prediction.ipynb`: Load `individual_features_clean.csv`, split data, train Logistic Regression baseline. Document AUC-ROC, Recall. | LR baseline metrics |
 | **Verah** | Complete `04_feature_engineering.ipynb` AND add reusable functions to `src/feature_engineering.py`. Compute IIT yoy change, VLS yoy change, Engineer Care Gap Index, build county_profiles.csv and tier_timeseries.csv. | `county_profiles.csv`, `tier_timeseries.csv`, `feature_engineering.py` |
 | **Naomi** | Complete `05_model_1_county_clustering.ipynb`: KMeans clustering, silhouette score, assign tier labels, save model. | `kmeans_county_tiers.pkl` |
