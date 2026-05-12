@@ -33,6 +33,7 @@ def calculate_silhouette_score(data, labels):
     
     
 ## classification_metrics() returning AUC-ROC, Recall, Precision, F1.
+
 from sklearn.metrics import (
     roc_auc_score, 
     recall_score, 
@@ -126,3 +127,55 @@ def forecast_errors(y_true, y_pred):
         "rmse": rmse,
         "mape": mape
     }
+
+## confusion_matrix_plot() and roc_curve_plot()
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, roc_curve, auc
+from src.constants import TIER_COLORS
+
+def confusion_matrix_plot(y_true, y_pred, title="Dropout Prediction: Confusion Matrix"):
+    """
+    Visualizes True Positives vs False Negatives.
+    Crucial for identifying how many 'at-risk' patients were missed.
+    """
+    cm = confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(8, 6))
+    
+    # Use a custom color map aligned with project theme
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Reds', 
+                xticklabels=['Stable', 'High-Risk'], 
+                yticklabels=['Stable', 'High-Risk'])
+    
+    plt.title(title, fontsize=14, pad=20)
+    plt.ylabel('Actual Status')
+    plt.xlabel('Predicted Risk')
+    plt.tight_layout()
+    plt.show()
+
+def roc_curve_plot(y_true, y_prob, title="Receiver Operating Characteristic (ROC)"):
+    """
+    Plots the True Positive Rate vs False Positive Rate.
+    The higher the AUC (Area Under Curve), the better the model 
+    distinguishes between stable and high-risk individuals.
+    """
+    fpr, tpr, thresholds = roc_curve(y_true, y_prob)
+    roc_auc = auc(fpr, tpr)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, color=TIER_COLORS['Critical'], lw=2, 
+             label=f'ROC curve (area = {roc_auc:.2f})')
+    
+    # Plot the random chance baseline
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate (Stable patients flagged as Risk)')
+    plt.ylabel('True Positive Rate (High-risk patients correctly caught)')
+    plt.title(title, fontsize=14, pad=20)
+    plt.legend(loc="lower right")
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
