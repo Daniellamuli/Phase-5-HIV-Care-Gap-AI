@@ -15,7 +15,6 @@ sys.path.append(
     os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..')
     )
-
 )
 
 from constants import (
@@ -39,7 +38,6 @@ def calculate_yoy_change(df, value_col):
     """
     Calculate year-on-year percentage change
     for a metric within each county.
-
     Parameters
     ----------
     df : pd.DataFrame
@@ -66,10 +64,10 @@ def calculate_yoy_change(df, value_col):
 
     # Calculate YoY percentage change
     df[yoy_col] = (
-        df.groupby(NSDCC_COUNTY_COL)[value_col]
-        .pct_change()
-    )
-
+    df.groupby(NSDCC_COUNTY_COL)[value_col]
+    .pct_change()
+    .fillna(0)  # First period = 0% change
+)
     return df
 
 # ============================================================
@@ -92,11 +90,10 @@ def engineer_yoy_features(df):
 
     df = calculate_yoy_change(
         df,
-        value_col="vls_rate"
+        value_col="vls_rate_adult"
     )
 
     return df
-
 
 # ============================================================
 # CARE GAP INDEX (CGI)
@@ -109,19 +106,18 @@ def calculate_care_gap_index(df):
     Formula:
         CGI =
         (0.4 × IIT_rate)
-      + (0.4 × (1 - VLS_rate))
+      + (0.4 × (1 - VLS_rate_adult))
       + (0.2 × HTS_positivity_rate)
 
     Returns
     -------
     pd.DataFrame
     """
-
     df = df.copy()
 
     required_cols = [
         "iit_rate",
-        "vls_rate",
+        "vls_rate_adult",
         "hts_positivity_rate"
     ]
 
@@ -139,7 +135,7 @@ def calculate_care_gap_index(df):
     # CGI calculation
     raw_cgi = (
         (IIT_WEIGHT * df["iit_rate"]) +
-        (VLS_WEIGHT * (1 - df["vls_rate"])) +
+        (VLS_WEIGHT * (1 - df["vls_rate_adult"])) +
         (HTS_WEIGHT * df["hts_positivity_rate"])
     )
 
@@ -186,7 +182,7 @@ def build_county_profiles(df, save=True):
         NSDCC_COUNTY_COL,
         NSDCC_PERIOD_COL,
         "iit_rate",
-        "vls_rate",
+        "vls_rate_adult",
         "hts_positivity_rate",
         "iit_rate_yoy_change",
         "vls_rate_yoy_change",
@@ -271,23 +267,26 @@ def build_tier_timeseries(df, save=True):
 
 def run_feature_engineering(df):
     """
-    Full reusable feature engineering pipeline.
-
-    Steps:
-    1. Engineer YoY changes
-    2. Engineer Care Gap Index
-
-    Returns
-    -------
-    pd.DataFrame
-    """
-
+    Full reusable feature engineering pipeline."""
+    df = df.copy()
+    
+    # Create HTS positivity rate if missing
+    if "hts_positivity_rate" not in df.columns:
+        if "hts_positive" in df.columns and "hts_tested" in df.columns:
+            df["hts_positivity_rate"] = (
+                df["hts_positive"] / df["hts_tested"]
+            ).fillna(0)
+        else:
+            raise ValueError(
+                "Missing columns 'hts_positive' and/or 'hts_tested'"
+            )
+    
     # YoY features
     df = engineer_yoy_features(df)
-
+    
     # Care Gap Index
     df = calculate_care_gap_index(df)
-
+    
     return df
 
 if __name__ == "__main__":
