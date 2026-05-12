@@ -2,7 +2,6 @@
 
 from sklearn.metrics import silhouette_score
 import pandas as pd
-from src.constants import KMEANS_RANDOM_STATE
 
 def calculate_silhouette_score(data, labels):
     """
@@ -43,7 +42,7 @@ from sklearn.metrics import (
     confusion_matrix
 )
 import pandas as pd
-from src.constants import MODEL2_TARGET
+from constants import MODEL2_TARGET
 
 def classification_metrics(y_true, y_pred, y_prob):
     """
@@ -133,7 +132,7 @@ def forecast_errors(y_true, y_pred):
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
-from src.constants import TIER_COLORS
+from constants import TIER_COLORS
 
 def confusion_matrix_plot(y_true, y_pred, title="Dropout Prediction: Confusion Matrix"):
     """
