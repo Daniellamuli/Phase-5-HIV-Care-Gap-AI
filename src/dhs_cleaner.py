@@ -61,13 +61,13 @@ class DHSCleaner:
 
     # In src/dhs_cleaner.py, replace decode_demographics method with:
 
-
     def decode_demographics(self) -> None:
         """
         Decode age, education, wealth, marital status, distance, work, and union using maps from constants
         """
         # Columns that need mapping (numeric codes → labels)
         numeric_mappings = {
+            "age_group": self.constants.DHS_AGE_GROUP_MAP,
             "education_level": self.constants.DHS_EDUCATION_MAP,
             "wealth_index": self.constants.DHS_WEALTH_MAP,
             "distance_to_facility": self.constants.DHS_DISTANCE_MAP,
