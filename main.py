@@ -288,3 +288,129 @@ def run_merge() -> None:
     merged = _merge(save=True)
     print(f"  Merged shape: {merged.shape}")
     return merged
+
+# ══════════════════════════════════════════════════════════════════════
+# STEP 4 — FEATURE ENGINEERING
+# Owner: Verah  |  src/feature_engineering.py  |  notebook 04  |  Day 2
+#
+# Verah's work confirmed:
+#   - Loads nsdcc_clean.csv
+#   - Creates hts_positivity_rate = hts_positive / hts_tested
+#   - Calculates Care Gap Index using weights from constants
+#   - Creates art_coverage (placeholder 0.5 — PLHIV estimates not available)
+#   - Builds county_profiles.csv (47 rows, one per county)
+#   - Note: YoY features set to 0 (only 2025 data available)
+# ══════════════════════════════════════════════════════════════════════
+ 
+def run_feature_engineering() -> None:
+    """
+    Build all features required by Models 1, 2, and 3.
+ 
+    Operations:
+      - Create HTS positivity rate: hts_positive / hts_tested
+      - Calculate Care Gap Index (CGI):
+            CGI = (IIT_WEIGHT * iit_rate
+                   + VLS_WEIGHT * (1 - vls_rate_adult)
+                   + HTS_WEIGHT * hts_positivity_rate) * CGI_SCALE_MAX
+      - Calculate ART coverage (placeholder 0.5 — PLHIV estimates unavailable)
+      - Build county_profiles.csv: one row per county, latest period (2025)
+      - Note: YoY features set to 0 (single-year data only)
+ 
+    Reads:  NSDCC_CLEAN
+    Writes: COUNTY_PROF (county_profiles.csv)
+    """
+    print("\n[STEP 4] Feature Engineering")
+    print("─" * 50)
+ 
+    import pandas as pd
+    from src.feature_engineering import run_feature_engineering as _fe
+ 
+    df = pd.read_csv(NSDCC_CLEAN)
+    print(f"  Loaded {NSDCC_CLEAN}: {df.shape}")
+ 
+    df_features = _fe(df, save=True)
+    print(f"  Feature engineering complete. Output shape: {df_features.shape}")
+    print(f"  Saved -> {COUNTY_PROF}")
+ 
+ 
+# ══════════════════════════════════════════════════════════════════════
+# STEP 5 — MODEL 1: COUNTY CLUSTERING (KMeans + Care Gap Index)
+# Owner: Naomi  |  notebook 05  |  Day 2-3
+#
+# Naomi's work confirmed (from notebook 05_model_1_county_clustering.ipynb):
+#   - Loads county_profiles.csv
+#   - Uses features: iit_rate, vls_rate (dropped art_coverage and iit_yoy_change)
+#   - Standardizes features, runs KMeans with k=4
+#   - Assigns tier labels: Critical, High, Moderate, Low
+#   - Adds tier column to county_profiles.csv
+#   - Saves model to kmeans_county_tiers.pkl
+#   - Generates county risk league table figure
+#
+#   Silhouette score: 0.6359 (k=4)
+#   Tier breakdown: Critical (14), High (25), Moderate (7), Low (1)
+# ══════════════════════════════════════════════════════════════════════
+ 
+def run_model1() -> None:
+    """
+    Model 1 — County Care Gap Map.
+ 
+    Algorithm: KMeans (k=4) on [iit_rate, vls_rate]
+    Output:
+      - Tier label per county: Critical / High / Moderate / Low
+      - Ranked bar chart of all 47 counties by Care Gap Index
+      - Silhouette score validation
+      - Saves: KMEANS_MODEL (models/kmeans_county_tiers.pkl)
+      - Adds tier column to county_profiles.csv
+ 
+    Reads:  COUNTY_PROF
+    Writes: KMEANS_MODEL, updated COUNTY_PROF
+    """
+    print("\n[STEP 5] Model 1 — County Clustering (KMeans)")
+    print("─" * 50)
+ 
+    import pandas as pd
+    import joblib
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import silhouette_score
+ 
+    # Load data
+    df = pd.read_csv(COUNTY_PROF)
+    print(f"  Loaded {COUNTY_PROF}: {df.shape}")
+ 
+    # Select features (iit_rate and vls_rate only)
+    X = df[['iit_rate', 'vls_rate']].values
+ 
+    # Standardize
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+ 
+    # Train KMeans
+    km = KMeans(n_clusters=KMEANS_K, random_state=KMEANS_RANDOM_STATE, n_init=10)
+    df['cluster'] = km.fit_predict(X_scaled)
+ 
+    # Assign tier labels based on cluster mean IIT rate
+    cluster_iit_mean = df.groupby('cluster')['iit_rate'].mean().sort_values(ascending=False)
+    cluster_to_tier = {
+        cluster_id: TIER_LABELS[rank]
+        for rank, cluster_id in enumerate(cluster_iit_mean.index)
+    }
+    df['tier'] = df['cluster'].map(cluster_to_tier)
+ 
+    # Calculate silhouette score
+    sil_score = silhouette_score(X_scaled, km.labels_)
+    print(f"  Silhouette score: {sil_score:.4f}")
+ 
+    # Save updated county_profiles
+    df.to_csv(COUNTY_PROF, index=False)
+    print(f"  Updated {COUNTY_PROF} with tier and cluster columns")
+ 
+    # Save model
+    joblib.dump(km, KMEANS_MODEL)
+    print(f"  Saved model -> {KMEANS_MODEL}")
+ 
+    # Print tier breakdown
+    print("\n  Tier breakdown:")
+    for tier in TIER_LABELS:
+        count = len(df[df['tier'] == tier])
+        print(f"    {tier}: {count} counties")
