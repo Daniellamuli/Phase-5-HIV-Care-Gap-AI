@@ -172,7 +172,23 @@ CGI_SCALE_MAX = 100
 KMEANS_K            = 4
 KMEANS_RANDOM_STATE = 42
 TIER_LABELS         = ["Critical", "High", "Moderate", "Low"]
-KMEANS_FEATURES     = ["iit_rate", "vls_rate", "art_coverage", "iit_yoy_change"]
+
+# CLUSTER FEATURES — confirmed from notebook 05 validation (2025 data only):
+#   - "iit_rate"      : from iit_rate_pct         — valid, used
+#   - "vls_rate"      : from vls_rate_adult        — valid, used
+#   - "art_coverage"  : DROPPED — adults_on_treatment is IIT regional data
+#                       (not PLHIV denominator), so adults_on_art /
+#                       adults_on_treatment >> 1 for all counties → clips
+#                       to constant 1.0 → zero clustering information
+#   - "iit_yoy_change": DROPPED — only 2025 period available; no prior
+#                       year to compute year-on-year change
+# Re-add art_coverage / iit_yoy_change here when multi-period data is available.
+KMEANS_FEATURES     = ["iit_rate", "vls_rate"]
+
+# k=4 is a deliberate project decision to produce 4 named tiers
+# (Critical / High / Moderate / Low). Silhouette analysis favours k=3
+# (score=0.6582) over k=4 (score=0.6359), but 4 tiers are required
+# for the intervention framework — do not change without team sign-off.
 
 TIER_COLORS = {
     "Critical": "#C0392B",
@@ -325,10 +341,16 @@ DHS_MARITAL_MAP    = {0:"Never married",1:"Married",2:"Living together",3:"Widow
 DHS_DISTANCE_MAP   = {0:"<1 km",1:"1-2 km",2:"2-5 km",3:"5-10 km",4:"10+ km",998:"Unknown"}
 
 # DHS WORKED LAST 12 MONTHS MAP (v731)
-# 0 = No, 1 = Yes
+# 0 = Never worked / no job
+# 1 = Worked in the past year (had work at some point in last 12 months but it stopped)
+# 2 = Currently working
+# 3 = Have a job but not currently working (on leave, sick leave, maternity leave,
+#     seasonal worker, or otherwise temporarily absent from work at time of survey)
 DHS_WORKED_MAP = {
-    0: "No",
-    1: "Yes",
+    0: "Never worked",
+    1: "In the past year",
+    2: "Currently working",
+    3: "Have job but not currently working",
 }
 
 # DHS CURRENTLY IN UNION MAP (v502)
