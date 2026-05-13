@@ -86,7 +86,7 @@ We have **6 raw files** from two sources:
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Create `scripts/merge_data.py`: Merge 5 clean NSDCC CSVs → `nsdcc_clean.csv`. Validate merge (47 counties, no lost rows). | `merge_data.py`, `nsdcc_clean.csv` |
-| **Lorenah** | Begin `06_model_2_dropout_prediction.ipynb`: Load `individual_features_clean.csv`, split data, train Logistic Regression baseline. Document AUC-ROC, Recall. | LR baseline metrics |
+| **Lorenah** | Begin `06_model_2_dropout_prediction.ipynb`: Load `individual_features_clean.csv`, split data, train Logistic Regression baseline. Document AUC-ROC, Recall. **Extract odds ratios with 95% confidence intervals. Save to `data/processed/odds_ratios.json`.** | LR baseline metrics, `odds_ratios.json` |
 | **Verah** | Complete `04_feature_engineering.ipynb` AND add reusable functions to `src/feature_engineering.py`. Compute Care Gap Index and build `county_profiles.csv`. Note: YOY change columns will be 0 (single year) — include them as placeholders for future multi-year data. | `county_profiles.csv`, `feature_engineering.py`, `feature_engineering.ipynb` |
 | **Naomi** | Complete `05_model_1_county_clustering.ipynb`: KMeans clustering, silhouette score, assign tier labels, save model. | `kmeans_county_tiers.pkl` |
 | **Dennis** | Update `src/evaluation.py`: Add `silhouette_score()`, `classification_metrics()`, `forecast_errors()` functions. | `evaluation.py` |
@@ -112,7 +112,7 @@ We have **6 raw files** from two sources:
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Create `scripts/train_model3.py`: Wrapper that runs both Component A (scenario projection) and Component B (cross-sectional comparison) and saves all forecast CSVs + `county_comparison.csv`. | `train_model3.py` |
-| **Lorenah** | Build `app/streamlit_app.py` Tab 1 (County Gap Map) — full implementation. **Stretch:** Add Folium choropleth map of Kenya counties colored by tier (Critical→Low). | Tab 1 working, choropleth map (if time) |
+| **Lorenah** | Build `app/streamlit_app.py` Tab 1 (County Gap Map) — full implementation. Stretch: Add Folium choropleth map. | Tab 1 working, choropleth map (if time) |
 | **Verah** | Complete `07_model_3_forecasting.ipynb`: Add Scenario B (30% IIT reduction in Critical + High tiers from 2026). Add patients-retained counter. Save all 5 forecast CSVs. | Forecast charts, all CSVs saved |
 | **Naomi** | Create `scripts/train_model2.py` wrapper for XGBoost + Set up Streamlit Cloud account. | `train_model2.py`, Cloud ready |
 | **Dennis** | Test Tab 1 (verify county colors, sorting, data loading). Report issues. | Tab 1 validated |
@@ -124,7 +124,7 @@ We have **6 raw files** from two sources:
 
 | Person | Task | Deliverable |
 |--------|------|-------------|
-| **Eve** | Build `app/streamlit_app.py` Tab 2 (Dropout Risk Calculator) — full implementation. | Tab 2 working |
+| **Eve** | Build `app/streamlit_app.py` Tab 2 (Risk Factor Identification) — full implementation. Load `odds_ratios.json` and display top risk factors with odds ratios and confidence intervals. | Tab 2 working |
 | **Lorenah** | Build `app/streamlit_app.py` Tab 3 (2030 Projection Charts) — full implementation. Include both Scenario A and Scenario B lines + cross-sectional comparison table. | Tab 3 working |
 | **Verah** | Create `app/trigger_alerts.py` — IIT alert system. | `trigger_alerts.py` |
 | **Naomi** | Integrate all 3 tabs, handle cross-tab dependencies + Create `app/trigger_predictions.py`. | Full dashboard, `trigger_predictions.py` |
@@ -138,7 +138,7 @@ We have **6 raw files** from two sources:
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Run `08_model_evaluation.ipynb` for Model 1 metrics. | Model 1 eval |
-| **Lorenah** | Run `08_model_evaluation.ipynb` for Model 2 metrics + Add metrics footer to dashboard. | Model 2 eval, dashboard footer |
+| **Lorenah** | Run `08_model_evaluation.ipynb` for Model 2 metrics + **Extract odds ratios from Logistic Regression**. Create **forest plot** of top 5-7 risk factors (wealth, distance, age, education, marital status) with 95% confidence intervals. Add odds ratios table to dashboard footer. | Model 2 eval, odds ratios table, forest plot |
 | **Verah** | Run `08_model_evaluation.ipynb` for Model 3 metrics. For scenario projection: document assumptions, validate Scenario B vs Scenario A gap, validate cross-sectional rankings. | Model 3 eval |
 | **Naomi** | Deploy dashboard to Streamlit Cloud (test deployment) + Compile all evaluation metrics. | Test URL, evaluation compiled |
 | **Dennis** | Help Verah with Model 3 evaluation (verify projection CSVs, cross-sectional comparison). | Support |
@@ -213,23 +213,6 @@ We have **6 raw files** from two sources:
 - [ ] README has data download link + step-by-step instructions + Model 3 methodology note
 - [ ] GitHub repo is public/accessible
 - [ ] Team has rehearsed at least once
-
----
-
-## Quick Reference: File Ownership by Day
-
-| Day | Eve | Lorenah | Verah | Naomi | Dennis | Daniella |
-|-----|-----|---------|-------|-------|--------|----------|
-| 1 | `02_nsdcc_cleaning.ipynb` + `nsdcc_cleaner.py` | `03_dhs_cleaning.ipynb` + `dhs_cleaner.py` | `src/feature_engineering.py` | `constants.py` | `src/utils.py` | `main.py` |
-| 2 | `scripts/merge_data.py` | `06_model_2_dropout_prediction.ipynb` (LR) | `04_feature_engineering.ipynb` + `src/feature_engineering.py` | `05_model_1_county_clustering.ipynb` | `src/evaluation.py` | `main.py` |
-| 3 | `scripts/train_model1.py` | `06_model_2_dropout_prediction.ipynb` (XGB) | `07_model_3_projection.ipynb` (Scenario A + cross-sectional) | `src/projection.py` (scenario functions) | `src/model_training.py` | `main.py` |
-| 4 | `scripts/train_model3.py` (scenario wrapper) | `scripts/train_model2.py` | `07_model_3_projection.ipynb` (Scenario B + CSVs) | `scripts/train_model2.py` + Cloud setup | `app/streamlit_app.py` (Tab 1) | `main.py` |
-| 5 | `app/streamlit_app.py` Tab 2 | `app/streamlit_app.py` Tab 3 | `app/trigger_alerts.py` | `app/trigger_predictions.py` + integrate tabs | Tabs 2-3 testing | `notebooks/final_notebook.ipynb` |
-| 6 | `08_model_evaluation.ipynb` (Model 1) | `08_model_evaluation.ipynb` (Model 2) | `08_model_evaluation.ipynb` (Model 3) | Compile all metrics | Dashboard metrics footer | `presentation/slides.md` |
-| 7 | Test `trigger_predictions.py` | Test `trigger_alerts.py` | `README.md` | `10_monitoring.ipynb` | Deploy dashboard (test) | `notebooks/final_notebook.ipynb` |
-| 8 | Pipeline test | Polish dashboard | Verify README | Browser check + fixes | Audit constants + monitoring | Create slides |
-| 9 | Practice M1 + dry run | Practice M2 + trigger test | Practice M3 + README verify | Practice Data + final check | Practice Deployment + audit | Lead rehearsal + polish slides |
-| 10 | Present | Present | Present | Present | Present | Submit all |
 
 ---
 
