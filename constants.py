@@ -38,7 +38,8 @@ TIER_TS      = os.path.join(PROCESSED_DIR, "tier_timeseries.csv")
 # ── MODEL FILES
 KMEANS_MODEL  = os.path.join(MODELS_DIR, "kmeans_county_tiers.pkl")
 XGBOOST_MODEL = os.path.join(MODELS_DIR, "xgboost_dropout.pkl")
-PROPHET_MODEL = os.path.join(MODELS_DIR, "prophet_bau.pkl")
+MODEL3_BUNDLE = os.path.join(MODELS_DIR, "model3_scenario.pkl")
+# PROPHET_MODEL removed — Model 3 uses tier-based scenario projection, not Prophet
 
 # ── FORECAST FILES
 FORECAST_CRITICAL = os.path.join(PROCESSED_DIR, "forecast_critical.csv")
@@ -255,12 +256,11 @@ MODEL2_FEATURES = [
 ]
 MODEL2_TARGET = "dropout"
 
-FORECAST_YEAR_END         = 2030
-IIT_REDUCTION_RATE        = 0.30
-BRIDGED_TIERS             = ["Critical", "High"]
-BRIDGED_START_YEAR        = 2026
-PROPHET_CHANGEPOINT_PRIOR = 0.05
-PROPHET_SEASONALITY_MODE  = "additive"
+FORECAST_YEAR_END  = 2030
+IIT_REDUCTION_RATE = 0.30
+BRIDGED_TIERS      = ["Critical", "High"]
+BRIDGED_START_YEAR = 2026
+# PROPHET_CHANGEPOINT_PRIOR + PROPHET_SEASONALITY_MODE removed — no Prophet in project
 
 STREAMLIT_PORT = 8505
 TAB1_TITLE     = "County Gap Map"
