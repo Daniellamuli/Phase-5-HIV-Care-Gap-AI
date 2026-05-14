@@ -1,48 +1,48 @@
 county,region,tier,iit_rate,vls_rate_adult,care_gap_index
-Baringo,Rift Valley,Critical,0.153,0.93,9.05
-Bomet,Rift Valley,Critical,0.153,0.9305,9.14
-Bungoma,Western,High,0.0895,0.9618,5.35
-Busia,Western,High,0.0895,0.9656,5.21
-Elgeyo Marakwet,Rift Valley,Critical,0.153,0.9494,8.29
-Embu,Eastern,High,0.0888,0.9429,6.08
+Baringo,Rift Valley,High,0.153,0.93,9.05
+Bomet,Rift Valley,High,0.153,0.9305,9.14
+Bungoma,Western,Low,0.0895,0.9618,5.35
+Busia,Western,Low,0.0895,0.9656,5.21
+Elgeyo Marakwet,Rift Valley,High,0.153,0.9494,8.29
+Embu,Eastern,Low,0.0888,0.9429,6.08
 Garissa,North Eastern,Moderate,0.1120522727272727,0.929,7.39
-Homa Bay,Nyanza,High,0.0913,0.9569,5.93
+Homa Bay,Nyanza,Low,0.0913,0.9569,5.93
 Isiolo,Eastern,Moderate,0.0888,0.9017,7.84
-Kajiado,Rift Valley,Critical,0.153,0.9644,7.77
-Kakamega,Western,High,0.0895,0.9606,5.4
-Kericho,Rift Valley,Critical,0.153,0.9532,8.3
-Kiambu,Central,High,0.1007,0.9617,5.81
+Kajiado,Rift Valley,High,0.153,0.9644,7.77
+Kakamega,Western,Low,0.0895,0.9606,5.4
+Kericho,Rift Valley,High,0.153,0.9532,8.3
+Kiambu,Central,Low,0.1007,0.9617,5.81
 Kilifi,Coast,Moderate,0.0926,0.9072,7.63
-Kirinyaga,Central,High,0.1007,0.9775,5.09
-Kisii,Nyanza,High,0.0913,0.9726,5.02
-Kisumu,Nyanza,High,0.0913,0.9599,5.54
-Kitui,Eastern,High,0.0888,0.9536,5.61
-Kwale,Coast,High,0.0926,0.9395,6.31
-Laikipia,Rift Valley,Critical,0.153,0.9647,7.73
-Lamu,Coast,Low,0.0926,0.8136,11.37
-Machakos,Eastern,High,0.0888,0.9603,5.4
-Makueni,Eastern,High,0.0888,0.9604,5.32
-Mandera,North Eastern,High,0.1120522727272727,1.0,4.5
+Kirinyaga,Central,Low,0.1007,0.9775,5.09
+Kisii,Nyanza,Low,0.0913,0.9726,5.02
+Kisumu,Nyanza,Low,0.0913,0.9599,5.54
+Kitui,Eastern,Low,0.0888,0.9536,5.61
+Kwale,Coast,Low,0.0926,0.9395,6.31
+Laikipia,Rift Valley,High,0.153,0.9647,7.73
+Lamu,Coast,Critical,0.0926,0.8136,11.37
+Machakos,Eastern,Low,0.0888,0.9603,5.4
+Makueni,Eastern,Low,0.0888,0.9604,5.32
+Mandera,North Eastern,Low,0.1120522727272727,1.0,4.5
 Marsabit,Eastern,Moderate,0.0888,0.9103,7.28
-Meru,Eastern,High,0.0888,0.9476,5.89
-Migori,Nyanza,High,0.0913,0.9551,5.7
-Mombasa,Coast,High,0.0926,0.9429,6.23
-Murang'a,Central,High,0.1007,0.9668,5.52
-Nairobi,Nairobi,High,0.113,0.9636,6.26
-Nakuru,Rift Valley,Critical,0.153,0.9568,8.01
-Nandi,Rift Valley,Critical,0.153,0.9368,8.92
-Narok,Rift Valley,Critical,0.153,0.9363,8.83
-Nyamira,Nyanza,High,0.0913,0.9632,5.32
-Nyandarua,Central,High,0.1007,0.945,6.44
-Nyeri,Central,High,0.1007,0.9782,5.08
-Samburu,Rift Valley,Critical,0.153,0.9131,9.78
+Meru,Eastern,Low,0.0888,0.9476,5.89
+Migori,Nyanza,Low,0.0913,0.9551,5.7
+Mombasa,Coast,Low,0.0926,0.9429,6.23
+Murang'a,Central,Low,0.1007,0.9668,5.52
+Nairobi,Nairobi,Low,0.113,0.9636,6.26
+Nakuru,Rift Valley,High,0.153,0.9568,8.01
+Nandi,Rift Valley,High,0.153,0.9368,8.92
+Narok,Rift Valley,High,0.153,0.9363,8.83
+Nyamira,Nyanza,Low,0.0913,0.9632,5.32
+Nyandarua,Central,Low,0.1007,0.945,6.44
+Nyeri,Central,Low,0.1007,0.9782,5.08
+Samburu,Rift Valley,High,0.153,0.9131,9.78
 Siaya,Nyanza,Moderate,0.0913,0.8947,8.17
 Taita Taveta,Coast,Moderate,0.0926,0.9046,7.69
 Tana River,Coast,Moderate,0.0926,0.8893,8.33
-Tharaka Nithi,Eastern,High,0.0888,0.9454,5.96
-Trans Nzoia,Rift Valley,Critical,0.153,0.9578,8.06
-Turkana,Rift Valley,Critical,0.153,0.9267,9.21
-Uasin Gishu,Rift Valley,Critical,0.153,0.9561,8.06
-Vihiga,Western,High,0.0895,0.9491,6.46
-Wajir,North Eastern,High,0.1120522727272727,1.0,4.51
-West Pokot,Rift Valley,Critical,0.153,0.9137,9.69
+Tharaka Nithi,Eastern,Low,0.0888,0.9454,5.96
+Trans Nzoia,Rift Valley,High,0.153,0.9578,8.06
+Turkana,Rift Valley,High,0.153,0.9267,9.21
+Uasin Gishu,Rift Valley,High,0.153,0.9561,8.06
+Vihiga,Western,Low,0.0895,0.9491,6.46
+Wajir,North Eastern,Low,0.1120522727272727,1.0,4.51
+West Pokot,Rift Valley,High,0.153,0.9137,9.69
