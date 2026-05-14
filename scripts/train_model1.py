@@ -10,7 +10,7 @@ What this script does
 1. Loads county_profiles.csv (Verah's feature engineering output)
 2. Extracts KMEANS_FEATURES from constants.py
 3. Scales features using StandardScaler
-4. Trains KMeans (k=4) on the scaled features
+4. Trains KMeans (k=4) using Dennis's train_kmeans() from src/model_training.py
 5. Maps cluster IDs to tier labels (Critical, High, Moderate, Low)
 6. Validates with Silhouette Score via src/evaluation.py
 7. Saves trained model to models/kmeans_county_tiers.pkl
@@ -52,9 +52,11 @@ sys.path.append(
 )
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
 
-# ── Use Dennis's evaluation utility — consistent with team architecture
+# ── Use Dennis's model_training utility
+from src.model_training import train_kmeans
+
+# ── Use Dennis's evaluation utility
 from src.evaluation import calculate_silhouette_score
 
 from constants import (
@@ -124,10 +126,10 @@ def assign_tier_labels(df):
     (Critical, High, Moderate, Low) based on mean CGI per cluster.
 
     Clusters are ranked by mean care_gap_index:
-        Highest CGI → Critical
-        Next        → High
-        Next        → Moderate
-        Lowest CGI  → Low
+        Highest CGI -> Critical
+        Next        -> High
+        Next        -> Moderate
+        Lowest CGI  -> Low
 
     Parameters
     ----------
@@ -177,7 +179,7 @@ def run_kmeans(save=True):
     1. Load county_profiles.csv
     2. Validate KMEANS_FEATURES (present + no NaNs)
     3. Scale features with StandardScaler
-    4. Fit KMeans (k=KMEANS_K, random_state=KMEANS_RANDOM_STATE)
+    4. Fit KMeans via Dennis's train_kmeans() from src/model_training.py
     5. Assign tier labels ranked by mean CGI
     6. Validate with calculate_silhouette_score() from src/evaluation.py
     7. Save model bundle to KMEANS_MODEL path (constants.py)
@@ -213,19 +215,18 @@ def run_kmeans(save=True):
     print(f'  Feature matrix shape: {X_scaled.shape}')
     print(f'  Features used: {KMEANS_FEATURES}')
 
-    # ── Step 4: Fit KMeans
+    # ── Step 4: Fit KMeans via Dennis's train_kmeans()
     print(f'\n[4] Fitting KMeans (k={KMEANS_K}, '
           f'random_state={KMEANS_RANDOM_STATE})...')
-    kmeans = KMeans(
+    kmeans, labels = train_kmeans(
+        X_scaled,
         n_clusters=KMEANS_K,
         random_state=KMEANS_RANDOM_STATE,
-        n_init=10,
     )
-    kmeans.fit(X_scaled)
-    df['cluster'] = kmeans.labels_
+    df['cluster'] = labels
     print(f'  KMeans fitted | inertia: {kmeans.inertia_:.2f}')
     print(f'  Cluster distribution:')
-    for c, n in df['cluster'].value_counts().sort_index().items():
+    for c, n in pd.Series(labels).value_counts().sort_index().items():
         print(f'    Cluster {c}: {n} counties')
 
     # ── Step 5: Assign tier labels
@@ -241,7 +242,7 @@ def run_kmeans(save=True):
 
     # ── Step 6: Silhouette Score via Dennis's evaluation utility
     print('\n[6] Validating with Silhouette Score...')
-    sil_score = calculate_silhouette_score(X_scaled, kmeans.labels_)
+    sil_score = calculate_silhouette_score(X_scaled, labels)
 
     # ── Step 7: Save model bundle
     if save:
