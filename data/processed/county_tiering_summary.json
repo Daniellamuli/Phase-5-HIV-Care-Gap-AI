@@ -1,0 +1,13 @@
+{
+  "total_counties": 47,
+  "tier_counts": {
+    "Critical": 21,
+    "Moderate": 14,
+    "High": 12
+  },
+  "cgi_range": {
+    "min": -110876.05793226382,
+    "max": 63.47560975609756,
+    "mean": -3493.819586473738
+  }
+}
