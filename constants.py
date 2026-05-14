@@ -22,7 +22,8 @@ ADULT_ART_FILE = os.path.join(RAW_DIR, "Adult_on_ART.xlsx")
 HTS_FILE       = os.path.join(RAW_DIR, "Adult_on_HTS.xlsx")
 VLT_FILE       = os.path.join(RAW_DIR, "VLT.xlsx")
 IIT_FILE       = os.path.join(RAW_DIR, "IIT.xlsx")
-DHS_REDUCED    = os.path.join(RAW_DIR, "individual_features.csv")
+DHS_REDUCED       = os.path.join(RAW_DIR, "individual_features.csv")
+HTS_POSITIVE_FILE = os.path.join(RAW_DIR, "HTS_Positive.xlsx")  # HIV+ tested counts by county + period
 
 # ── PROCESSED FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
@@ -65,11 +66,17 @@ VLT_HAS_PERIOD  = False
 
 # IIT: has Region only — NO Period column, 9 rows only
 IIT_REGION_COL  = "Region"
+IIT_COUNTY_COL  = "Region"   # alias — IIT uses Region not County
 IIT_HAS_PERIOD  = False
 
 # Shared period col name (ART + HTS only)
 NSDCC_PERIOD_COL = "Period"
 NSDCC_COUNTY_COL = "County"
+
+# Post-cleaning column names (lowercase)
+# Use these in feature_engineering.py and all notebooks after cleaning
+CLEAN_COUNTY_COL = "county"
+CLEAN_PERIOD_COL = "period"
 
 # =============================================================
 # COLUMN RENAME MAPS — exact raw names → clean names
