@@ -139,7 +139,7 @@ def project_bau(df: pd.DataFrame = None) -> pd.DataFrame:
                 "iit_rate":       row["iit_rate"],
                 "vls_rate_adult": row["vls_rate_adult"],
                 "care_gap_index": row["care_gap_index"],
-                "scenario":       "BAU",
+                "scenario": "A",   # A = BAU flat projection
             })
 
     return pd.DataFrame(rows)
@@ -200,7 +200,7 @@ def project_bridged_gap(df: pd.DataFrame = None) -> pd.DataFrame:
                 "iit_rate":       round(iit_rate, 6),
                 "vls_rate_adult": round(vls_rate, 6),
                 "care_gap_index": cgi_base,
-                "scenario":       "Bridged",
+                "scenario": "B",   # B = Bridged Gap 30% IIT reduction
             })
 
     return pd.DataFrame(rows)
@@ -246,15 +246,7 @@ def build_scenario_df(
     # ── Per-tier CSVs (BAU only — matches notebook 07 Cell 7)
     if save:
         os.makedirs(PROCESSED_DIR, exist_ok=True)
-        for tier in bau["tier"].unique():
-            tier_df  = bau[bau["tier"] == tier].copy()
-            filename = os.path.join(
-                PROCESSED_DIR,
-                f"prediction_{tier.lower()}.csv"
-            )
-            tier_df.to_csv(filename, index=False)
-
-        # ── Tier-level forecast files (BAU + Bridged combined per tier)
+        # Save both scenarios (A + B) per tier — matches constants FORECAST_* paths
         for tier, path in TIER_FORECAST_FILES.items():
             tier_df = combined[combined["tier"] == tier].copy()
             tier_df.to_csv(path, index=False)
@@ -265,14 +257,14 @@ def build_scenario_df(
         .agg(iit_rate=("iit_rate","mean"),
              vls_rate_adult=("vls_rate_adult","mean"))
         .reset_index()
-        .assign(scenario="BAU")
+        .assign(scenario="A")
     )
     national_bridged = (
         bridged.groupby("year")
         .agg(iit_rate=("iit_rate","mean"),
              vls_rate_adult=("vls_rate_adult","mean"))
         .reset_index()
-        .assign(scenario="Bridged")
+        .assign(scenario="B")
     )
     national = pd.concat([national_bau, national_bridged], ignore_index=True)
 
@@ -281,6 +273,27 @@ def build_scenario_df(
         print(f"  ✓ Saved national forecast   → {FORECAST_NATIONAL}")
         for tier, path in TIER_FORECAST_FILES.items():
             print(f"  ✓ Saved {tier:<10} forecast → {path}")
+        # Save model bundle for Streamlit Tab 3
+        try:
+            from constants import MODEL3_BUNDLE
+            bundle = {
+                "scenario_params": {
+                    "base_year": BASE_YEAR,
+                    "forecast_year_end": FORECAST_YEAR_END,
+                    "iit_reduction_rate": IIT_REDUCTION_RATE,
+                    "bridged_tiers": BRIDGED_TIERS,
+                    "bridged_start_year": BRIDGED_START_YEAR,
+                },
+                "combined": combined,
+                "national": national,
+            }
+            os.makedirs(os.path.dirname(MODEL3_BUNDLE), exist_ok=True)
+            import pickle
+            with open(MODEL3_BUNDLE, "wb") as f:
+                pickle.dump(bundle, f)
+            print(f"  ✓ Saved model bundle        → {MODEL3_BUNDLE}")
+        except Exception as e:
+            print(f"  ⚠ MODEL3_BUNDLE not saved: {e}")
 
     return {
         "bau":              bau,
@@ -523,7 +536,7 @@ def run_projection_pipeline(save: bool = True) -> dict:
     print(f"\n{'=' * 58}")
     print("  ✓ Projection pipeline complete")
     print(f"  Outputs saved to: {PROCESSED_DIR}")
-    print(f"  Files: prediction_critical/high/moderate/low.csv,")
+    print(f"  Files: forecast_critical/high/moderate/low.csv,")
     print(f"         forecast_*.csv, forecast_national.csv,")
     print(f"         county_comparison.csv, patients_retained.csv")
     print("=" * 58)
