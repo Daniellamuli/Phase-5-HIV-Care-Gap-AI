@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
 # Importing project-wide constants
-import src.constants as c
+import constants as c
 
 def train_kmeans(
     X: pd.DataFrame, 
