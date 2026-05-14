@@ -15,5 +15,13 @@
     "worked_last_12months",
     "currently_in_union"
   ],
-  "total_features": 18
+  "total_features": 18,
+  "top_risk_factors": [
+    "ever_tested_hiv",
+    "edu_No education"
+  ],
+  "top_risk_ors": [
+    37.281,
+    2.565
+  ]
 }

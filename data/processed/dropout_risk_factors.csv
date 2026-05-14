@@ -1,19 +1,19 @@
 Feature,Coefficient,Odds_Ratio,Risk_Direction
-ever_tested_hiv,3.6185,37.281,Higher
-edu_No education,0.942,2.565,Higher
-age_group,0.4006,1.493,Higher
-marital_status,0.3801,1.462,Higher
-currently_in_union,0.2758,1.318,Higher
-wealth_Richest,0.1457,1.157,Higher
-wealth_Poorer,0.0846,1.088,Higher
-worked_last_12months,0.0215,1.022,Higher
-num_sexual_partners,0.0206,1.021,Higher
-wealth_Middle,0.0191,1.019,Higher
-edu_Higher,-0.0041,0.996,Lower
-county,-0.0184,0.982,Lower
-edu_Secondary,-0.1167,0.89,Lower
-wealth_Richer,-0.1555,0.856,Lower
-distance_to_facility,-0.251,0.778,Lower
-wealth_Poorest,-0.3326,0.717,Lower
-edu_Primary,-1.06,0.346,Lower
-tested_hiv_last_12months,-10.8081,0.0,Lower
+ever_tested_hiv,3.6184714398607465,37.281,Higher
+edu_No education,0.9420295885104416,2.565,Higher
+age_group,0.4005860540666155,1.493,Higher
+marital_status,0.3800765977509107,1.462,Higher
+currently_in_union,0.2758334678878959,1.318,Higher
+wealth_Richest,0.14567189367623717,1.157,Higher
+wealth_Poorer,0.08457630209980366,1.088,Higher
+worked_last_12months,0.021487385266292982,1.022,Higher
+num_sexual_partners,0.02059479972826195,1.021,Higher
+wealth_Middle,0.019114243100667276,1.019,Higher
+edu_Higher,-0.0041458284963002846,0.996,Lower
+county,-0.018397415046478963,0.982,Lower
+edu_Secondary,-0.1166588059965372,0.89,Lower
+wealth_Richer,-0.15553830672468974,0.856,Lower
+distance_to_facility,-0.2509887674996628,0.778,Lower
+wealth_Poorest,-0.3326360957608648,0.717,Lower
+edu_Primary,-1.0600369176265954,0.346,Lower
+tested_hiv_last_12months,-10.808138925473102,0.0,Lower
