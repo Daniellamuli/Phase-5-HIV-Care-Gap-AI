@@ -35,7 +35,7 @@ def train_kmeans(
     )
     labels = model.fit_predict(X)
     
-    print("✓ Model 1 training complete.")
+    print(" Model 1 training complete.")
     return model, labels
 
 def train_xgboost(
@@ -74,7 +74,7 @@ def train_xgboost(
     model = XGBClassifier(**default_params)
     model.fit(X_train, y_train)
     
-    print("✓ Model 2 (XGBoost) training complete.")
+    print(" Model 2 (XGBoost) training complete.")
     return model
 
 def train_logistic(
@@ -100,7 +100,7 @@ def train_logistic(
     )
     model.fit(X_train, y_train)
     
-    print("✓ Baseline Model 2 (Logistic) training complete.")
+    print(" Baseline Model 2 (Logistic) training complete.")
     return model
 
 def save_model(model: Any, path: str) -> None:
@@ -114,9 +114,9 @@ def save_model(model: Any, path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     try:
         joblib.dump(model, path)
-        print(f"✓ Model successfully saved to: {path}")
+        print(f" Model successfully saved to: {path}")
     except Exception as e:
-        print(f"✗ Error saving model: {e}")
+        print(f" Error saving model: {e}")
 
 def load_model(path: str) -> Optional[Any]:
     """
@@ -129,12 +129,12 @@ def load_model(path: str) -> Optional[Any]:
         The loaded model object if found, else None.
     """
     if not os.path.exists(path):
-        print(f"⚠ Warning: Model file not found at {path}")
+        print(f" Warning: Model file not found at {path}")
         return None
     
     try:
         model = joblib.load(path)
-        print(f"✓ Model loaded from: {path}")
+        print(f" Model loaded from: {path}")
         return model
     except Exception as e:
         print(f"✗ Error loading model: {e}")
