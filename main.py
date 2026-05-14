@@ -31,7 +31,7 @@ NOTE — constants.py gap (fix before running):
             "Total_Females":"hts_positive_females",
         }
 
-Team: Daniella (Lead) · Eve · Verah · Naomi · Lorenah · Dennis
+Team: Daniella · Eve · Verah · Naomi · Lorenah · Dennis
 Methodology: CRISP-DM
 """
 
