@@ -34,6 +34,7 @@ DHS_CLEAN    = os.path.join(PROCESSED_DIR, "individual_features_clean.csv")
 NSDCC_CLEAN  = os.path.join(PROCESSED_DIR, "nsdcc_clean.csv")
 COUNTY_PROF  = os.path.join(PROCESSED_DIR, "county_profiles.csv")
 TIER_TS      = os.path.join(PROCESSED_DIR, "tier_timeseries.csv")
+IIT_ALERTS   = os.path.join(PROCESSED_DIR, "iit_alerts.csv")  # counties flagged above IIT threshold
 
 # ── MODEL FILES
 KMEANS_MODEL  = os.path.join(MODELS_DIR, "kmeans_county_tiers.pkl")
@@ -78,6 +79,16 @@ NSDCC_COUNTY_COL = "County"
 # Use these in feature_engineering.py and all notebooks after cleaning
 CLEAN_COUNTY_COL = "county"
 CLEAN_PERIOD_COL = "period"
+
+# ── CGI COLUMN NAMES
+# These are the standardised column names used in the CGI formula
+# across notebook 04, notebook 05, and src/projection.py.
+# Verah (NB04): must map iit_rate_pct → iit_rate before CGI calculation
+# Naomi  (NB05): Cell 6 already maps iit_rate_pct → iit_rate  ✓
+# projection.py: reads iit_rate directly from county_profiles.csv  ✓
+CGI_IIT_COL = "iit_rate"        # column used in CGI formula (not iit_rate_pct)
+CGI_VLS_COL = "vls_rate_adult"  # column used in CGI formula
+CGI_HTS_COL = "hts_positivity_rate"  # column used in CGI formula
 
 # =============================================================
 # COLUMN RENAME MAPS — exact raw names → clean names
