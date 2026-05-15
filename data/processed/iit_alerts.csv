@@ -1,19 +1,19 @@
 county,tier,iit_rate,alert_reason
-Baringo,High,0.153,Above fallback threshold
-Bomet,High,0.153,Above fallback threshold
-Uasin Gishu,High,0.153,Above fallback threshold
-Turkana,High,0.153,Above fallback threshold
-Trans Nzoia,High,0.153,Above fallback threshold
-Samburu,High,0.153,Above fallback threshold
-Narok,High,0.153,Above fallback threshold
-Nandi,High,0.153,Above fallback threshold
-Nakuru,High,0.153,Above fallback threshold
-Laikipia,High,0.153,Above fallback threshold
-Kericho,High,0.153,Above fallback threshold
-Kajiado,High,0.153,Above fallback threshold
-Elgeyo Marakwet,High,0.153,Above fallback threshold
-West Pokot,High,0.153,Above fallback threshold
-Nairobi,Low,0.113,Above national average
-Mandera,Low,0.1120522727272727,Above national average
+Baringo,Critical,0.153,Above fallback threshold
+Bomet,Critical,0.153,Above fallback threshold
+Uasin Gishu,Critical,0.153,Above fallback threshold
+Turkana,Critical,0.153,Above fallback threshold
+Trans Nzoia,Critical,0.153,Above fallback threshold
+Samburu,Critical,0.153,Above fallback threshold
+Narok,Critical,0.153,Above fallback threshold
+Nandi,Critical,0.153,Above fallback threshold
+Nakuru,Critical,0.153,Above fallback threshold
+Laikipia,Critical,0.153,Above fallback threshold
+Kericho,Critical,0.153,Above fallback threshold
+Kajiado,Critical,0.153,Above fallback threshold
+Elgeyo Marakwet,Critical,0.153,Above fallback threshold
+West Pokot,Critical,0.153,Above fallback threshold
+Nairobi,High,0.113,Above national average
+Mandera,High,0.1120522727272727,Above national average
 Garissa,Moderate,0.1120522727272727,Above national average
-Wajir,Low,0.1120522727272727,Above national average
+Wajir,High,0.1120522727272727,Above national average
