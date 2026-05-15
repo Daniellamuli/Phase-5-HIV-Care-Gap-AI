@@ -27,13 +27,15 @@ HTS_POSITIVE_FILE = os.path.join(RAW_DIR, "HTS_Positive.xlsx")  # HIV+ tested co
 
 # ── PROCESSED FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
-HTS_CLEAN    = os.path.join(PROCESSED_DIR, "hts_clean.csv")
+HTS_CLEAN     = os.path.join(PROCESSED_DIR, "hts_clean.csv")
+HTS_POS_CLEAN = os.path.join(PROCESSED_DIR, "hts_positive_clean.csv")  # HIV+ counts cleaned
 VLT_CLEAN    = os.path.join(PROCESSED_DIR, "vlt_clean.csv")
 IIT_CLEAN    = os.path.join(PROCESSED_DIR, "iit_clean.csv")
 DHS_CLEAN    = os.path.join(PROCESSED_DIR, "individual_features_clean.csv")
 NSDCC_CLEAN  = os.path.join(PROCESSED_DIR, "nsdcc_clean.csv")
 COUNTY_PROF  = os.path.join(PROCESSED_DIR, "county_profiles.csv")
 TIER_TS      = os.path.join(PROCESSED_DIR, "tier_timeseries.csv")
+IIT_ALERTS   = os.path.join(PROCESSED_DIR, "iit_alerts.csv")  # counties flagged above IIT threshold
 
 # ── MODEL FILES
 KMEANS_MODEL  = os.path.join(MODELS_DIR, "kmeans_county_tiers.pkl")
@@ -61,6 +63,11 @@ HTS_COUNTY_COL  = "County"
 HTS_PERIOD_COL  = "Period"
 HTS_COUNTY_SUFFIX = " County"   # same suffix as ART
 
+# HTS Positive file column constants (same format as HTS)
+HTS_POS_COUNTY_COL    = "County"
+HTS_POS_PERIOD_COL    = "Period"
+HTS_POS_COUNTY_SUFFIX = " County"
+
 # VLT: has County only — NO Period column (single snapshot)
 VLT_COUNTY_COL  = "County"
 VLT_HAS_PERIOD  = False
@@ -79,6 +86,16 @@ NSDCC_COUNTY_COL = "County"
 CLEAN_COUNTY_COL = "county"
 CLEAN_PERIOD_COL = "period"
 
+# ── CGI COLUMN NAMES
+# These are the standardised column names used in the CGI formula
+# across notebook 04, notebook 05, and src/projection.py.
+# Verah (NB04): must map iit_rate_pct → iit_rate before CGI calculation
+# Naomi  (NB05): Cell 6 already maps iit_rate_pct → iit_rate  ✓
+# projection.py: reads iit_rate directly from county_profiles.csv  ✓
+CGI_IIT_COL = "iit_rate"        # column used in CGI formula (not iit_rate_pct)
+CGI_VLS_COL = "vls_rate_adult"  # column used in CGI formula
+CGI_HTS_COL = "hts_positivity_rate"  # column used in CGI formula
+
 # =============================================================
 # COLUMN RENAME MAPS — exact raw names → clean names
 # Used by clean_data.py and notebook 02
@@ -94,6 +111,12 @@ HTS_RENAME = {
     "Total":        "hts_tested",
     "Total_Males":  "hts_tested_males",
     "Total_Females":"hts_tested_females",
+}
+
+HTS_POSITIVE_RENAME = {
+    "Total":        "hts_positive",
+    "Total_Males":  "hts_positive_males",
+    "Total_Females":"hts_positive_females",
 }
 
 VLT_RENAME = {

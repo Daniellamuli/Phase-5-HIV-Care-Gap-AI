@@ -5,7 +5,6 @@ import numpy as np
 from typing import Any, Optional, Tuple, Dict
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LogisticRegression
-from xgboost import XGBClassifier
 
 # Importing project-wide constants
 import constants as c
@@ -38,44 +37,6 @@ def train_kmeans(
     print(" Model 1 training complete.")
     return model, labels
 
-def train_xgboost(
-    X_train: pd.DataFrame, 
-    y_train: pd.Series, 
-    params: Optional[Dict[str, Any]] = None
-) -> XGBClassifier:
-    """
-    Fits the XGBoost classifier for individual dropout prediction.
-    Automatically applies scale_pos_weight to handle the 0.08% dropout rate.
-
-    Args:
-        X_train: Training features (MODEL2_FEATURES).
-        y_train: Binary target (dropout).
-        params: Optional dictionary to override default constants.
-
-    Returns:
-        Fitted XGBClassifier model.
-    """
-    print("Training Model 2: XGBoost Classifier...")
-    
-    # Default parameters from constants.py
-    default_params = {
-        'n_estimators': c.XGB_N_ESTIMATORS,
-        'max_depth': c.XGB_MAX_DEPTH,
-        'learning_rate': c.XGB_LEARNING_RATE,
-        'scale_pos_weight': c.XGB_SCALE_POS_WEIGHT,
-        'random_state': c.RANDOM_STATE,
-        'use_label_encoder': False,
-        'eval_metric': 'logloss'
-    }
-    
-    if params:
-        default_params.update(params)
-
-    model = XGBClassifier(**default_params)
-    model.fit(X_train, y_train)
-    
-    print(" Model 2 (XGBoost) training complete.")
-    return model
 
 def train_logistic(
     X_train: pd.DataFrame, 

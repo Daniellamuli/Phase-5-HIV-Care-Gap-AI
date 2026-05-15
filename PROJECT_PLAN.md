@@ -99,10 +99,10 @@ We have **6 raw files** from two sources:
 | Person | Task | Deliverable |
 |--------|------|-------------|
 | **Eve** | Create `scripts/train_model1.py` wrapper for KMeans. | `train_model1.py` |
-| **Lorenah** | Complete `06_model_2_dropout_prediction.ipynb`: Train XGBoost, evaluate, plot feature importance. | XGBoost trained, metrics |
+| **Lorenah** | Complete `06_model_2_dropout_prediction.ipynb`: Train Logistic Regression, calculate odds ratios with 95% CIs, generate forest plot with error bars, save risk factors to CSV. | Odds ratios, forest plot, risk factors CSV |
 | **Verah** | Begin `07_model_3_projection.ipynb`: **Component A** — Run Scenario A (BAU flat projection) per tier from 2025 to 2030. **Component B** — Cross-sectional comparison: rank all 47 counties by IIT rate, VLS rate, HTS positivity. Identify best vs worst counties, regional patterns, urban vs rural disparities. Save `county_comparison.csv`. | BAU projection plotted, `county_comparison.csv` |
 | **Naomi** | Create `src/projection.py`: Add `project_bau()`, `project_bridged_gap()`, `build_scenario_df()`, `cross_sectional_compare()`, `patients_retained_counter()` functions. **Note: No Prophet — scenario-based projection only.** | `projection.py` |
-| **Dennis** | Create `src/model_training.py`: Add KMeans wrapper, XGBoost wrapper functions. | `model_training.py` |
+| **Dennis** | Create `src/model_training.py`: Add KMeans wrapper | `model_training.py` |
 | **Daniella** | Update `main.py` with Model 1 + Model 2 training steps. Review PRs. | `main.py` Day 3 running |
 
 ---
