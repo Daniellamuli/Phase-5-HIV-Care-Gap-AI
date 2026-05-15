@@ -1,3 +1,4 @@
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -14,7 +15,10 @@ import numpy as np
 sys.path.append(
 
     os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..")
+        os.path.join(
+            os.path.dirname(__file__),
+            ".."
+        )
     )
 )
 
@@ -22,7 +26,9 @@ from constants import (
 
     COUNTY_PROF,
 
-    IIT_ALERT_FALLBACK_THRESHOLD
+    IIT_ALERT_FALLBACK_THRESHOLD,
+
+    IIT_ALERTS
 )
 
 # ============================================================
@@ -34,10 +40,38 @@ county_profiles = pd.read_csv(
 )
 
 # ============================================================
-# NATIONAL IIT AVERAGE
+# VALIDATE REQUIRED COLUMNS
+# ============================================================
+
+required_cols = [
+
+    "county",
+
+    "tier",
+
+    "iit_rate"
+]
+
+missing_cols = [
+
+    col for col in required_cols
+    if col not in county_profiles.columns
+]
+
+if missing_cols:
+
+    raise ValueError(
+
+        f"Missing required columns: "
+        f"{missing_cols}"
+    )
+
+# ============================================================
+# COMPUTE NATIONAL AVERAGE IIT RATE
 # ============================================================
 
 national_avg_iit = (
+
     county_profiles["iit_rate"]
     .mean()
 )
@@ -67,7 +101,7 @@ alerts_df = county_profiles[
 ].copy()
 
 # ============================================================
-# ALERT REASONS
+# ADD ALERT REASONS
 # ============================================================
 
 alerts_df["alert_reason"] = np.where(
@@ -110,14 +144,9 @@ print(final_alerts)
 # SAVE ALERTS CSV
 # ============================================================
 
-os.makedirs(
-    "data/processed",
-    exist_ok=True
-)
-
 final_alerts.to_csv(
 
-    "data/processed/iit_alerts.csv",
+    IIT_ALERTS,
 
     index=False
 )
