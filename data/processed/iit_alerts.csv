@@ -1,0 +1,19 @@
+county,tier,iit_rate,alert_reason
+Baringo,Critical,0.153,Above fallback threshold
+Bomet,Critical,0.153,Above fallback threshold
+Uasin Gishu,Critical,0.153,Above fallback threshold
+Turkana,Critical,0.153,Above fallback threshold
+Trans Nzoia,Critical,0.153,Above fallback threshold
+Samburu,Critical,0.153,Above fallback threshold
+Narok,Critical,0.153,Above fallback threshold
+Nandi,Critical,0.153,Above fallback threshold
+Nakuru,Critical,0.153,Above fallback threshold
+Laikipia,Critical,0.153,Above fallback threshold
+Kericho,Critical,0.153,Above fallback threshold
+Kajiado,Critical,0.153,Above fallback threshold
+Elgeyo Marakwet,Critical,0.153,Above fallback threshold
+West Pokot,Critical,0.153,Above fallback threshold
+Nairobi,High,0.113,Above national average
+Mandera,High,0.1120522727272727,Above national average
+Garissa,Moderate,0.1120522727272727,Above national average
+Wajir,High,0.1120522727272727,Above national average
