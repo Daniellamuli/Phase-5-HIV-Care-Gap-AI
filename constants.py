@@ -27,7 +27,8 @@ HTS_POSITIVE_FILE = os.path.join(RAW_DIR, "HTS_Positive.xlsx")  # HIV+ tested co
 
 # ── PROCESSED FILES
 ART_CLEAN    = os.path.join(PROCESSED_DIR, "adult_on_art_clean.csv")
-HTS_CLEAN    = os.path.join(PROCESSED_DIR, "hts_clean.csv")
+HTS_CLEAN     = os.path.join(PROCESSED_DIR, "hts_clean.csv")
+HTS_POS_CLEAN = os.path.join(PROCESSED_DIR, "hts_positive_clean.csv")  # HIV+ counts cleaned
 VLT_CLEAN    = os.path.join(PROCESSED_DIR, "vlt_clean.csv")
 IIT_CLEAN    = os.path.join(PROCESSED_DIR, "iit_clean.csv")
 DHS_CLEAN    = os.path.join(PROCESSED_DIR, "individual_features_clean.csv")
@@ -61,6 +62,11 @@ ART_COUNTY_SUFFIX = " County"   # values are "Baringo County" — strip this
 HTS_COUNTY_COL  = "County"
 HTS_PERIOD_COL  = "Period"
 HTS_COUNTY_SUFFIX = " County"   # same suffix as ART
+
+# HTS Positive file column constants (same format as HTS)
+HTS_POS_COUNTY_COL    = "County"
+HTS_POS_PERIOD_COL    = "Period"
+HTS_POS_COUNTY_SUFFIX = " County"
 
 # VLT: has County only — NO Period column (single snapshot)
 VLT_COUNTY_COL  = "County"
@@ -105,6 +111,12 @@ HTS_RENAME = {
     "Total":        "hts_tested",
     "Total_Males":  "hts_tested_males",
     "Total_Females":"hts_tested_females",
+}
+
+HTS_POSITIVE_RENAME = {
+    "Total":        "hts_positive",
+    "Total_Males":  "hts_positive_males",
+    "Total_Females":"hts_positive_females",
 }
 
 VLT_RENAME = {
