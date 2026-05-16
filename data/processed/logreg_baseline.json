@@ -1,6 +1,6 @@
 {
   "model": "LogisticRegression",
-  "auc_roc": 0.7248,
+  "auc_roc": 0.7243,
   "recall": 0.4,
   "precision": 0.0013,
   "f1": 0.0025,
@@ -21,7 +21,7 @@
     "edu_No education"
   ],
   "top_risk_ors": [
-    37.281,
-    2.565
+    35.086,
+    2.65
   ]
 }
