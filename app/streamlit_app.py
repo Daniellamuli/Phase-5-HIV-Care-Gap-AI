@@ -369,12 +369,31 @@ with tab3:
 
     col1, col2 = st.columns(2)
 
-    with col1:
-        st.markdown("**🔴 Highest Risk Counties (Worst CGI)**")
-        top_worst = df_county.nlargest(10, "care_gap_index")[
-            ["county", "tier", "care_gap_index", "iit_rate", "vls_rate_adult"]
-        ]
-        st.dataframe(top_worst, use_container_width=True)
+with col1:
+    st.markdown("**🔴 Highest Risk Counties (Worst CGI)**")
+    # Sort by CGI descending (worst first) regardless of tier label
+    top_worst = df_county.nlargest(10, "care_gap_index")[
+        ["county", "tier", "care_gap_index", "iit_rate", "vls_rate_adult"]
+    ]
+    # Add visual indicator for misclassified counties
+    st.dataframe(
+        top_worst.style.applymap(
+            lambda x: (
+                "background-color: #ffcccc"
+                if x == "Low"
+                and top_worst.loc[
+                    top_worst["county"] == "Lamu", "care_gap_index"
+                ].values[0]
+                > 10
+                else ""
+            ),
+            subset=["tier"],
+        ),
+        use_container_width=True,
+    )
+    st.caption(
+        "⚠️ Note: Lamu has highest CGI (11.37) but is classified as 'Low' tier - potential clustering issue"
+    )
 
     with col2:
         st.markdown("**🟢 Best Performing Counties (Best CGI)**")
