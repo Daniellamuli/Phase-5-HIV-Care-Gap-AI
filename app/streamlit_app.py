@@ -240,54 +240,183 @@ with tab2:
 # TAB 3: SCENARIO PROJECTIONS
 # ============================================================
 with tab3:
-    st.header("Scenario Projections (2025-2030)")
+    st.header("📈 Scenario Projections (2025-2030)")
 
-    # Scenario selector
-    scenario = st.radio(
-        "Select Scenario", ["A - Business as Usual", "B - Bridged Gap (30% reduction)"]
-    )
-    scenario_letter = "A" if "A" in scenario else "B"
+    # Load all forecast files
+    @st.cache_data
+    def load_all_forecasts():
+        forecasts = {}
+        for tier in ["Critical", "High", "Moderate", "Low"]:
+            file_map = {
+                "Critical": c.FORECAST_CRITICAL,
+                "High": c.FORECAST_HIGH,
+                "Moderate": c.FORECAST_MODERATE,
+                "Low": c.FORECAST_LOW,
+            }
+            try:
+                df = pd.read_csv(file_map[tier])
+                forecasts[tier] = df
+            except Exception as e:
+                st.warning(f"Could not load {tier} forecast: {e}")
+                forecasts[tier] = pd.DataFrame()
+        return forecasts
 
-    # Plot IIT projections by tier
-    fig, ax = plt.subplots(figsize=(12, 6))
+    forecasts = load_all_forecasts()
+
+    # Load national projection
+    @st.cache_data
+    def load_national_forecast():
+        try:
+            return pd.read_csv(c.FORECAST_NATIONAL)
+        except:
+            return pd.DataFrame()
+
+    national_df = load_national_forecast()
+
+    # Task: 4 dual-scenario line charts
+    st.subheader("📊 IIT Rate Projections by Tier")
 
     for tier in ["Critical", "High", "Moderate", "Low"]:
-        forecast_df = load_forecast(tier)
-        tier_df = forecast_df[forecast_df["scenario"] == scenario_letter]
-        ax.plot(
-            tier_df["year"],
-            tier_df["iit_rate"],
-            marker="o",
-            label=tier,
-            color=TIER_COLORS.get(tier),
-        )
+        df_tier = forecasts.get(tier)
+        if not df_tier.empty:
+            st.markdown(f"### {tier} Tier")
 
-    ax.set_xlabel("Year")
-    ax.set_ylabel("IIT Rate")
-    ax.set_title(f"Scenario {scenario_letter} - IIT Rate Projections")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    st.pyplot(fig)
+            fig, ax = plt.subplots(figsize=(10, 5))
 
-    # Patients saved summary
-    patients_file = "data/processed/patients_retained.csv"
-    if os.path.exists(patients_file):
-        patients_df = pd.read_csv(patients_file)
-        patients_2030 = patients_df[patients_df["year"] == 2030]
-        total_saved = patients_2030["patients_saved"].sum()
+            # Scenario A
+            df_a = df_tier[df_tier["scenario"] == "A"]
+            if not df_a.empty:
+                ax.plot(
+                    df_a["year"],
+                    df_a["iit_rate"],
+                    "o--",
+                    color="blue",
+                    linewidth=2,
+                    label="Scenario A (Business as Usual)",
+                )
 
-        st.metric(
-            "Total Patients Saved by 2030 (Scenario B vs A)",
-            f"{int(total_saved):,}",
-            delta="Under Bridged Gap Scenario",
-        )
+            # Scenario B
+            df_b = df_tier[df_tier["scenario"] == "B"]
+            if not df_b.empty:
+                ax.plot(
+                    df_b["year"],
+                    df_b["iit_rate"],
+                    "s-",
+                    color="red",
+                    linewidth=2,
+                    label="Scenario B (30% Reduction)",
+                )
 
-        # By tier
-        st.subheader("Patients Saved by Tier")
-        tier_saved = patients_2030.groupby("tier")["patients_saved"].sum().reset_index()
-        fig2, ax2 = plt.subplots(figsize=(8, 5))
-        colors_saved = [TIER_COLORS.get(t, "#808080") for t in tier_saved["tier"]]
-        ax2.bar(tier_saved["tier"], tier_saved["patients_saved"], color=colors_saved)
-        ax2.set_ylabel("Patients Saved")
-        ax2.set_title("Additional Patients Retained by 2030")
+            ax.set_xlabel("Year")
+            ax.set_ylabel("IIT Rate")
+            ax.set_title(f"{tier} Tier - IIT Rate Projections", fontweight="bold")
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            ax.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
+
+            st.pyplot(fig)
+
+    # Task: National headline chart
+    st.subheader("🇰🇪 National Projections")
+
+    if not national_df.empty:
+        fig2, ax2 = plt.subplots(figsize=(10, 5))
+
+        df_nat_a = national_df[national_df["scenario"] == "A"]
+        df_nat_b = national_df[national_df["scenario"] == "B"]
+
+        if not df_nat_a.empty:
+            ax2.plot(
+                df_nat_a["year"],
+                df_nat_a["iit_rate"],
+                "o--",
+                color="blue",
+                linewidth=2,
+                label="Scenario A (Business as Usual)",
+            )
+
+        if not df_nat_b.empty:
+            ax2.plot(
+                df_nat_b["year"],
+                df_nat_b["iit_rate"],
+                "s-",
+                color="red",
+                linewidth=2,
+                label="Scenario B (30% Reduction)",
+            )
+
+        ax2.set_xlabel("Year")
+        ax2.set_ylabel("IIT Rate")
+        ax2.set_title("Kenya National IIT Rate Projections", fontweight="bold")
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
+
         st.pyplot(fig2)
+
+        # Key insight metric
+        if not df_nat_b.empty and not df_nat_a.empty:
+            final_b = df_nat_b[df_nat_b["year"] == 2030]["iit_rate"].values
+            final_a = df_nat_a[df_nat_a["year"] == 2030]["iit_rate"].values
+            if len(final_b) > 0 and len(final_a) > 0:
+                reduction = (final_a[0] - final_b[0]) / final_a[0] * 100
+                st.success(
+                    f"📉 Scenario B reduces national IIT rate by {reduction:.0f}% by 2030"
+                )
+
+    # Task: Cross-sectional comparison table
+    st.subheader("📋 County Comparison (2025 Baseline)")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("**🔴 Highest Risk Counties (Worst CGI)**")
+        top_worst = df_county.nlargest(10, "care_gap_index")[
+            ["county", "tier", "care_gap_index", "iit_rate", "vls_rate_adult"]
+        ]
+        st.dataframe(top_worst, use_container_width=True)
+
+    with col2:
+        st.markdown("**🟢 Best Performing Counties (Best CGI)**")
+        top_best = df_county.nsmallest(10, "care_gap_index")[
+            ["county", "tier", "care_gap_index", "iit_rate", "vls_rate_adult"]
+        ]
+        st.dataframe(top_best, use_container_width=True)
+
+    # Task: CSV download button
+    st.subheader("📥 Export Projection Data")
+
+    # Prepare combined export data
+    all_projections = []
+    for tier, df_tier in forecasts.items():
+        if not df_tier.empty:
+            df_tier_copy = df_tier.copy()
+            df_tier_copy["tier"] = tier
+            all_projections.append(df_tier_copy)
+
+    if all_projections:
+        export_df = pd.concat(all_projections, ignore_index=True)
+
+        csv = export_df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Download All Projections (CSV)",
+            data=csv,
+            file_name="hiv_care_gap_projections.csv",
+            mime="text/csv",
+        )
+
+    # Task: Error handling and tooltips
+    with st.expander("ℹ️ About This Dashboard"):
+        st.markdown("""
+        **Data Sources:**
+        - County profiles: NSDCC 2025 data
+        - Projections: Scenario-based modeling
+        
+        **Scenarios:**
+        - **Scenario A (BAU)**: Current IIT rates remain constant through 2030
+        - **Scenario B (Bridged Gap)**: 30% reduction in IIT rates for Critical/High tiers starting 2026
+        
+        **CGI (Care Gap Index):** 
+        - Weighted composite of IIT rate (40%), VLS rate (40%), and HTS positivity (20%)
+        - Lower scores indicate larger care gaps
+        """)
