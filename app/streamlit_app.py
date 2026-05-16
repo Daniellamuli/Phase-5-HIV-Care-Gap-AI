@@ -95,6 +95,116 @@ with tab1:
     plt.tight_layout()
     st.pyplot(fig)
 
+    # Task G1DFP5CP-135: Folium choropleth map
+st.subheader("🗺️ Geographic Distribution of County Tiers")
+
+try:
+    import folium
+    from streamlit_folium import st_folium
+    import json
+
+    # Create base map centered on Kenya
+    kenya_center = [0.5, 38.0]
+    m = folium.Map(location=kenya_center, zoom_start=6, tiles="CartoDB positron")
+
+    # County coordinates (approximate centroids)
+    county_coords = {
+        "Baringo": [0.4667, 35.9667],
+        "Bomet": [-0.7833, 35.3333],
+        "Bungoma": [0.5667, 34.5667],
+        "Busia": [0.4667, 34.1167],
+        "Elgeyo Marakwet": [0.8333, 35.5833],
+        "Embu": [-0.5333, 37.4500],
+        "Garissa": [-0.4500, 39.6500],
+        "Homa Bay": [-0.5167, 34.4500],
+        "Isiolo": [0.3500, 37.5833],
+        "Kajiado": [-1.8500, 36.7833],
+        "Kakamega": [0.2833, 34.7500],
+        "Kericho": [-0.3667, 35.2833],
+        "Kiambu": [-1.1667, 36.8333],
+        "Kilifi": [-3.6333, 39.8500],
+        "Kirinyaga": [-0.5000, 37.2833],
+        "Kisii": [-0.6833, 34.7667],
+        "Kisumu": [-0.1000, 34.7500],
+        "Kitui": [-1.3667, 38.0167],
+        "Kwale": [-4.1667, 39.4500],
+        "Laikipia": [0.1833, 36.9500],
+        "Lamu": [-2.2667, 40.9000],
+        "Machakos": [-1.5167, 37.2667],
+        "Makueni": [-2.2833, 37.8333],
+        "Mandera": [3.9333, 41.8667],
+        "Marsabit": [2.3333, 37.9833],
+        "Meru": [0.0500, 37.6500],
+        "Migori": [-1.0667, 34.4667],
+        "Mombasa": [-4.0500, 39.6667],
+        "Murang'a": [-0.7167, 37.1500],
+        "Nairobi": [-1.2833, 36.8167],
+        "Nakuru": [-0.3000, 36.0667],
+        "Nandi": [0.1667, 35.1167],
+        "Narok": [-1.0833, 35.8667],
+        "Nyamira": [-0.5667, 34.9333],
+        "Nyandarua": [-0.1667, 36.6333],
+        "Nyeri": [-0.4167, 36.9500],
+        "Samburu": [1.1667, 36.6667],
+        "Siaya": [0.0667, 34.2833],
+        "Taita Taveta": [-3.4000, 38.3667],
+        "Tana River": [-1.7333, 39.6667],
+        "Tharaka Nithi": [-0.3000, 37.9500],
+        "Trans Nzoia": [1.0167, 34.9667],
+        "Turkana": [3.3167, 35.5667],
+        "Uasin Gishu": [0.5167, 35.2833],
+        "Vihiga": [0.0833, 34.7167],
+        "Wajir": [1.7500, 40.0667],
+        "West Pokot": [1.1667, 35.1167],
+    }
+
+    # Add circle markers for each county
+    for _, row in df_county.iterrows():
+        county = row["county"]
+        tier = row["tier"]
+        cgi = row["care_gap_index"]
+
+        if county in county_coords:
+            coords = county_coords[county]
+            color = TIER_COLORS.get(tier, "#808080").lstrip("#")
+
+            folium.CircleMarker(
+                location=coords,
+                radius=10,
+                popup=f"<b>{county}</b><br>Tier: {tier}<br>CGI: {cgi:.1f}",
+                color=f"#{color}",
+                fill=True,
+                fill_color=f"#{color}",
+                fill_opacity=0.7,
+                weight=2,
+            ).add_to(m)
+
+    # Add legend
+    legend_html = """
+    <div style="position: fixed; bottom: 50px; right: 50px; z-index: 1000; 
+                background-color: white; padding: 10px; border-radius: 5px; 
+                border: 1px solid grey;">
+        <b>Tier Legend</b><br>
+        <i class="fa fa-circle" style="color:#C0392B"></i> Critical<br>
+        <i class="fa fa-circle" style="color:#E67E22"></i> High<br>
+        <i class="fa fa-circle" style="color:#F1C40F"></i> Moderate<br>
+        <i class="fa fa-circle" style="color:#27AE60"></i> Low
+    </div>
+    """
+    m.get_root().html.add_child(folium.Element(legend_html))
+
+    # Display map
+    st_map = st_folium(m, width=800, height=600, returned_objects=[])
+    st.caption("🗺️ County tier distribution map (circle size indicates relative CGI)")
+
+except ImportError:
+    st.info(
+        "📦 Install folium and streamlit-folium: pip install folium streamlit-folium"
+    )
+except Exception as e:
+    st.warning(f"⚠️ Map could not be loaded: {e}")
+    st.info("Choropleth map requires folium. Run: pip install folium streamlit-folium")
+
     # Data table
     st.subheader("County Data")
     st.dataframe(df_county, use_container_width=True)
