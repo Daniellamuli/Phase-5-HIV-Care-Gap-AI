@@ -140,7 +140,7 @@ We have **6 raw files** from two sources:
 | **Eve** | Run `08_model_evaluation.ipynb` for Model 1 metrics. | Model 1 eval |
 | **Lorenah** | Run `08_model_evaluation.ipynb` for Model 2 metrics + **Extract odds ratios from Logistic Regression**. Create **forest plot** of top 5-7 risk factors (wealth, distance, age, education, marital status) with 95% confidence intervals. Add odds ratios table to dashboard footer. | Model 2 eval, odds ratios table, forest plot |
 | **Verah** | Run `08_model_evaluation.ipynb` for Model 3 metrics. For scenario projection: document assumptions, validate Scenario B vs Scenario A gap, validate cross-sectional rankings. | Model 3 eval |
-| **Naomi** | Deploy dashboard to Streamlit Cloud (test deployment) + Compile all evaluation metrics. | Test URL, evaluation compiled |
+| **Naomi** | Deploy dashboard to Streamlit Cloud (test deployment) + Compile all evaluation metrics + Create `09_deployment.ipynb`	. | Test URL, evaluation compiled, `notebooks/09_deployment.ipynb` |
 | **Dennis** | Help Verah with Model 3 evaluation (verify projection CSVs, cross-sectional comparison). | Support |
 | **Daniella** | Test deployed dashboard on 3 browsers + Create `presentation/slides.md` outline. | Test report, slides outline |
 
@@ -153,7 +153,7 @@ We have **6 raw files** from two sources:
 | **Eve** | Test `trigger_predictions.py` with dry run. | Trigger tested |
 | **Lorenah** | Test `trigger_alerts.py` with current data. | Alerts tested |
 | **Verah** | Update `README.md` with setup and run instructions. **Include Model 3 methodology update section explaining switch from Prophet to scenario projection.** | README complete |
-| **Naomi** | Final deployment to Streamlit Cloud (production) + Complete `final_notebook.ipynb`. | Live dashboard URL, final notebook |
+| **Naomi** | Final deployment to Streamlit Cloud (production) + Update `09_deployment.ipynb` with final URL`. | Live dashboard URL, final 09_deployment.ipynb |
 | **Dennis** | Complete `10_monitoring.ipynb` (documentation for annual updates). | Monitoring notebook |
 | **Daniella** | Review PRs, coordinate final checks. | All PRs merged |
 
