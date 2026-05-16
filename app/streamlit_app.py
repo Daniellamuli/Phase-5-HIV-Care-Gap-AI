@@ -252,33 +252,353 @@ with tab1:
         )
 
 # ============================================================
-# TAB 2: RISK FACTORS (From Model 2)
+# TAB 2: RISK CALCULATOR AND FACTORS (From Model 2)
 # ============================================================
 with tab2:
-    st.header("Dropout Risk Factors")
-
-    # Load odds ratios from Model 2
-    risk_file = "data/processed/dropout_risk_factors.csv"
-    if os.path.exists(risk_file):
-        risk_df = pd.read_csv(risk_file)
-        st.subheader("Top Risk Factors (Odds Ratios)")
-        st.dataframe(risk_df.head(10), use_container_width=True)
-
-        # Forest plot
-        fig, ax = plt.subplots(figsize=(10, 6))
-        top_risk = risk_df.head(10)
-        colors_risk = [
-            "#E74C3C" if x > 1 else "#27AE60" for x in top_risk["Odds_Ratio"]
-        ]
-        ax.barh(top_risk["Feature"], top_risk["Odds_Ratio"], color=colors_risk)
-        ax.axvline(x=1, color="black", linestyle="--")
-        ax.set_xlabel("Odds Ratio")
-        ax.set_title("Top 10 Risk Factors for Dropout")
-        st.pyplot(fig)
-    else:
-        st.info(
-            "Run 06_model_2_dropout_prediction.ipynb or output `dropout_risk_factors.csv` to look at factors."
+    st.header(c.TAB2_TITLE)
+    st.markdown(
+        "Enter a patient profile below to calculate their HIV care dropout "
+        "risk probability and see the top risk factors driving that score."
+    )
+    st.markdown("---")
+ 
+    # ── Load odds ratios with CI from constants path
+    @st.cache_data
+    def load_odds_ratios():
+        if not os.path.exists(c.ODDS_RATIOS_CI_JSON):
+            return None
+        with open(c.ODDS_RATIOS_CI_JSON, "r") as f:
+            import json
+            return json.load(f)
+ 
+    # ── Load XGBoost model — fall back to logistic regression proxy
+    @st.cache_resource
+    def load_dropout_model():
+        import joblib
+        if os.path.exists(c.XGBOOST_MODEL):
+            model = joblib.load(c.XGBOOST_MODEL)
+            return model, "XGBoost"
+        return None, "unavailable"
+ 
+    odds_data  = load_odds_ratios()
+    model, model_name = load_dropout_model()
+ 
+    # ── County list from constants (set() removes duplicates)
+    county_list = sorted(set(c.COUNTY_NAME_MAP.values()))
+ 
+    # ── Age group options from constants
+    age_options      = list(c.DHS_AGE_GROUP_MAP.values())
+    wealth_options   = list(c.DHS_WEALTH_MAP.values())
+    edu_options      = list(c.DHS_EDUCATION_MAP.values())
+    distance_options = [v for k, v in c.DHS_DISTANCE_MAP.items() if k != 998]
+    marital_options  = list(c.DHS_MARITAL_MAP.values())
+ 
+    # ============================================================
+    # SECTION 1 — RISK CALCULATOR
+    # ============================================================
+    st.subheader("🧮 Patient Risk Calculator")
+ 
+    if model_name == "unavailable":
+        st.warning(
+            "⚠️ XGBoost model (`xgboost_dropout.pkl`) not found. "
+            "Run `scripts/train_model2.py` to generate it. "
+            "Risk factor analysis below is still fully available."
         )
+    else:
+        st.caption(f"Model: {model_name}")
+ 
+    with st.form("risk_calculator_form"):
+        col1, col2, col3 = st.columns(3)
+ 
+        with col1:
+            county       = st.selectbox("County", county_list)
+            age_group    = st.selectbox("Age Group", age_options)
+ 
+        with col2:
+            wealth_index     = st.selectbox("Wealth Index", wealth_options)
+            education_level  = st.selectbox("Education Level", edu_options)
+ 
+        with col3:
+            distance_to_facility = st.selectbox(
+                "Distance to Facility", distance_options
+            )
+            marital_status = st.selectbox("Marital Status", marital_options)
+ 
+        submitted = st.form_submit_button(
+            "Calculate Dropout Risk", use_container_width=True
+        )
+ 
+    if submitted:
+        if model_name != "unavailable" and model is not None:
+ 
+            # ── Build feature vector matching MODEL2_FEATURES
+            # Map inputs back to numeric codes
+            age_code      = [k for k, v in c.DHS_AGE_GROUP_MAP.items()
+                             if v == age_group][0]
+            marital_code  = [k for k, v in c.DHS_MARITAL_MAP.items()
+                             if v == marital_status][0]
+            dist_code     = [k for k, v in c.DHS_DISTANCE_MAP.items()
+                             if v == distance_to_facility][0]
+            county_code   = [k for k, v in c.DHS_COUNTY_MAP.items()
+                             if v == county][0] if hasattr(c, "DHS_COUNTY_MAP") else 1
+ 
+            # One-hot encode education
+            edu_higher     = 1 if education_level == "Higher"       else 0
+            edu_no_edu     = 1 if education_level == "No education"  else 0
+            edu_primary    = 1 if education_level == "Primary"       else 0
+            edu_secondary  = 1 if education_level == "Secondary"     else 0
+ 
+            # One-hot encode wealth
+            wealth_middle  = 1 if wealth_index == "Middle"   else 0
+            wealth_poorer  = 1 if wealth_index == "Poorer"   else 0
+            wealth_poorest = 1 if wealth_index == "Poorest"  else 0
+            wealth_richer  = 1 if wealth_index == "Richer"   else 0
+            wealth_richest = 1 if wealth_index == "Richest"  else 0
+ 
+            import numpy as np
+            feature_vector = np.array([[
+                county_code,    # county
+                age_code,       # age_group
+                marital_code,   # marital_status
+                dist_code,      # distance_to_facility
+                1,              # ever_tested_hiv (patient is in HIV care workflow)
+                1,              # tested_hiv_last_12months (patient is active in system)
+                0,              # num_sexual_partners (median default)
+                0,              # worked_last_12months
+                0,              # currently_in_union
+                edu_higher,
+                edu_no_edu,
+                edu_primary,
+                edu_secondary,
+                wealth_middle,
+                wealth_poorer,
+                wealth_poorest,
+                wealth_richer,
+                wealth_richest,
+            ]])
+ 
+            try:
+                prob = model.predict_proba(feature_vector)[0][1]
+                pct  = prob * 100
+ 
+                st.markdown("### 🎯 Dropout Risk Score")
+ 
+                # Color-coded risk display
+                if pct >= 60:
+                    st.error(
+                        f"🔴 **HIGH RISK: {pct:.1f}%** — "
+                        f"Immediate follow-up recommended"
+                    )
+                    risk_color = "#C0392B"
+                elif pct >= 30:
+                    st.warning(
+                        f"🟠 **MODERATE RISK: {pct:.1f}%** — "
+                        f"Schedule follow-up within 30 days"
+                    )
+                    risk_color = "#E67E22"
+                else:
+                    st.success(
+                        f"🟢 **LOW RISK: {pct:.1f}%** — "
+                        f"Routine monitoring"
+                    )
+                    risk_color = "#27AE60"
+ 
+                # Risk gauge bar
+                st.progress(int(min(pct, 100)))
+                st.caption(
+                    f"Risk probability: {pct:.2f}% | "
+                    f"Model: {model_name} | "
+                    f"Threshold: 30% = moderate, 60% = high"
+                )
+ 
+            except Exception as e:
+                st.error(f"Prediction error: {e}")
+        else:
+            st.info(
+                "Risk calculator requires `xgboost_dropout.pkl`. "
+                "Risk factor analysis below is still available."
+            )
+ 
+    st.markdown("---")
+ 
+    # ============================================================
+    # SECTION 2 — TOP 5 RISK FACTORS WITH CIs
+    # ============================================================
+    st.subheader("📊 Top 5 Risk Factors for HIV Care Dropout")
+    st.caption(
+        "Odds ratios with 95% bootstrap confidence intervals — "
+        "from Logistic Regression (Kenya DHS 2022, n=32,156)"
+    )
+ 
+    if odds_data is None:
+        st.warning(
+            f"⚠️ `odds_ratios_with_ci.json` not found. "
+            f"Run `06_model_2_dropout_prediction.ipynb` to generate it."
+        )
+    else:
+        # ── Pull top 5 risk factors (OR > 1, sorted descending)
+        all_features = odds_data.get("features", [])
+        top5 = sorted(
+            [f for f in all_features if f["Odds_Ratio"] > 1],
+            key=lambda x: x["Odds_Ratio"],
+            reverse=True
+        )[:5]
+ 
+        if top5:
+            # ── Forest plot with CI error bars
+            features   = [f["Feature"]    for f in top5]
+            ors        = [f["Odds_Ratio"] for f in top5]
+            ci_lower   = [f["CI_Lower"]   for f in top5]
+            ci_upper   = [f["CI_Upper"]   for f in top5]
+ 
+            # Cap x-axis — ever_tested_hiv CI_Upper is 6500
+            # Display capped at 40 for readability; value shown in table
+            X_CAP = 40
+            ors_plot      = [min(o, X_CAP)       for o in ors]
+            ci_upper_plot = [min(u, X_CAP)       for u in ci_upper]
+            ci_lower_plot = [max(l, 0)            for l in ci_lower]
+ 
+            xerr_lower = [o - l for o, l in zip(ors_plot, ci_lower_plot)]
+            xerr_upper = [u - o for u, o in zip(ci_upper_plot, ors_plot)]
+ 
+            fig, ax = plt.subplots(figsize=(10, 5))
+            fig.patch.set_facecolor("#0F1117")
+            ax.set_facecolor("#1E2130")
+ 
+            colors_risk = ["#C0392B" if o >= 2 else "#E67E22" for o in ors]
+ 
+            ax.barh(
+                features, ors_plot,
+                xerr=[xerr_lower, xerr_upper],
+                color=colors_risk,
+                error_kw=dict(ecolor="white", capsize=5, linewidth=1.5),
+                height=0.5,
+            )
+            ax.axvline(x=1, color="white", linestyle="--",
+                       linewidth=1, label="No effect (OR=1)")
+            ax.set_xlabel("Odds Ratio (95% CI)", color="white", fontsize=11)
+            ax.set_title(
+                "Top 5 Risk Factors for HIV Care Dropout",
+                color="white", fontsize=13, fontweight="bold", pad=12
+            )
+            ax.tick_params(colors="white")
+            ax.set_xlim(0, X_CAP)
+            for sp in ax.spines.values():
+                sp.set_edgecolor("#2C3E50")
+            ax.legend(
+                facecolor="#1E2130", edgecolor="#2C3E50",
+                labelcolor="white", fontsize=9
+            )
+ 
+            # Annotate OR values on bars
+            for i, (feature, or_val, cap_val) in enumerate(
+                zip(features, ors, ors_plot)
+            ):
+                label = (
+                    f"OR={or_val:.2f} ⚠ capped at {X_CAP}"
+                    if or_val > X_CAP
+                    else f"OR={or_val:.2f}"
+                )
+                ax.text(
+                    cap_val + 0.3, i, label,
+                    va="center", color="white", fontsize=8.5
+                )
+ 
+            plt.tight_layout()
+            st.pyplot(fig)
+            plt.close(fig)
+ 
+            # ── Risk factors table
+            st.markdown("#### Risk Factor Summary Table")
+            table_data = []
+            for f in top5:
+                ci_note = (
+                    f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.1f}]"
+                    if f["CI_Upper"] > X_CAP
+                    else f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.3f}]"
+                )
+                table_data.append({
+                    "Risk Factor":        f["Feature"],
+                    "Odds Ratio":         f"{f['Odds_Ratio']:.3f}",
+                    "95% CI":             ci_note,
+                    "Interpretation":     (
+                        "🔴 Strong risk factor"
+                        if f["Odds_Ratio"] >= 5
+                        else "🟠 Moderate risk factor"
+                        if f["Odds_Ratio"] >= 2
+                        else "🟡 Mild risk factor"
+                    ),
+                })
+            st.dataframe(
+                pd.DataFrame(table_data),
+                use_container_width=True,
+                hide_index=True,
+            )
+ 
+        # ── Protective factors section
+        st.markdown("---")
+        st.subheader("🛡️ Protective Factors (OR < 1)")
+        st.caption("Features associated with lower dropout risk")
+ 
+        protective = sorted(
+            [f for f in all_features if f["Odds_Ratio"] < 1
+             and f["Feature"] != "tested_hiv_last_12months"],
+            key=lambda x: x["Odds_Ratio"]
+        )[:5]
+ 
+        if protective:
+            prot_data = []
+            for f in protective:
+                prot_data.append({
+                    "Protective Factor": f["Feature"],
+                    "Odds Ratio":        f"{f['Odds_Ratio']:.3f}",
+                    "95% CI":            f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.3f}]",
+                    "Risk Reduction":    f"{(1 - f['Odds_Ratio']) * 100:.0f}% lower risk",
+                })
+            st.dataframe(
+                pd.DataFrame(prot_data),
+                use_container_width=True,
+                hide_index=True,
+            )
+ 
+    st.markdown("---")
+ 
+    # ── Model performance summary
+    st.subheader("📈 Model Performance")
+ 
+    @st.cache_data
+    def load_logreg_baseline():
+        import json
+        if not os.path.exists(c.LOGREG_BASELINE_JSON):
+            return None
+        with open(c.LOGREG_BASELINE_JSON, "r") as f:
+            return json.load(f)
+ 
+    baseline = load_logreg_baseline()
+    if baseline:
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            st.metric("AUC-ROC",   f"{baseline.get('auc_roc', 0):.4f}")
+        with m2:
+            st.metric("Recall",    f"{baseline.get('recall', 0):.4f}")
+        with m3:
+            st.metric("Precision", f"{baseline.get('precision', 0):.4f}")
+        with m4:
+            st.metric("F1 Score",  f"{baseline.get('f1', 0):.4f}")
+ 
+        with st.expander("ℹ️ Model Notes"):
+            st.markdown(f"""
+            **Model:** {baseline.get('model', 'Logistic Regression')}
+            **Features used:** {baseline.get('total_features', 18)}
+            **Training data:** Kenya DHS 2022 Individual Recode (n=32,156)
+            **Dropout cases:** Only 26 confirmed dropouts (0.08% prevalence)
+            **Key limitation:** Extremely low dropout prevalence means
+            precision is low — recall is the primary metric for this
+            public health use case (missing a high-risk patient is worse
+            than a false alarm).
+            """)
+    else:
+        st.info("Run `06_model_2_dropout_prediction.ipynb` to generate model metrics.")
 
 # ============================================================
 # TAB 3: SCENARIO PROJECTIONS
