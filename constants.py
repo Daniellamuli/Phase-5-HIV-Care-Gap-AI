@@ -50,6 +50,11 @@ FORECAST_MODERATE = os.path.join(PROCESSED_DIR, "forecast_moderate.csv")
 FORECAST_LOW      = os.path.join(PROCESSED_DIR, "forecast_low.csv")
 FORECAST_NATIONAL = os.path.join(PROCESSED_DIR, "forecast_national.csv")
 
+# ── MODEL 2 OUTPUT FILES
+LOGREG_BASELINE_JSON  = os.path.join(PROCESSED_DIR, "logreg_baseline.json")
+DROPOUT_RISK_FACTORS  = os.path.join(PROCESSED_DIR, "dropout_risk_factors.csv")
+ODDS_RATIOS_CI_JSON   = os.path.join(PROCESSED_DIR, "odds_ratios_with_ci.json")
+
 # =============================================================
 # COLUMN NAME CONSTANTS — confirmed from actual files
 # =============================================================
