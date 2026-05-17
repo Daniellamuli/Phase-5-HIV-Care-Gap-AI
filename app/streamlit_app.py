@@ -28,11 +28,17 @@ st.set_page_config(
     layout="wide"
 )
 
-# ── Title
-st.title("🏥 HIV Care Gap AI Dashboard")
-st.caption(
-    "Kenya HIV Care Gap AI · County Risk Mapping · Dropout Prediction · 2030 Scenario Forecasting"
-)
+# ── Logo + Title
+logo_path = os.path.join(PROJECT_ROOT, "figures", "logo.jpg")
+col_logo, col_title = st.columns([1, 8])
+with col_logo:
+    if os.path.exists(logo_path):
+        st.image(logo_path, width=80)
+with col_title:
+    st.title("🏥 HIV Care Gap AI Dashboard")
+    st.caption(
+        "Kenya HIV Care Gap AI · County Risk Mapping · Dropout Prediction · 2030 Scenario Forecasting"
+    )
 st.markdown("---")
 
 # ── Tier colours
@@ -44,6 +50,7 @@ TIER_COLORS = {
 }
 
 # ── Readable column names for Tab 1 summary table
+# art_coverage excluded — placeholder value (0.5) for all counties
 READABLE_COLS = {
     "county":              "County",
     "period":              "Year",
@@ -53,7 +60,6 @@ READABLE_COLS = {
     "vls_rate_adult":      "Viral Load Suppression Rate",
     "hts_positivity_rate": "HTS Positivity Rate",
     "adults_on_art":       "Adults on ART",
-    "art_coverage":        "ART Coverage",
 }
 
 # ============================================================
@@ -147,7 +153,7 @@ with tab1:
     st.header(getattr(c, "TAB1_TITLE", "HIV Care Gap County Map"))
 
     st.info(
-        "🗺️ **What is this?** This tab shows Kenya's 47 counties ranked by their "
+        "This tab shows Kenya's 47 counties ranked by their "
         "HIV Care Gap Index (CGI). Counties are grouped into 4 tiers based on "
         "how urgently they need HIV care interventions. "
         "🔴 **Critical** = most urgent · 🟠 **High** = urgent · "
@@ -256,7 +262,7 @@ with tab1:
                 <span style="color:#27AE60">●</span> Low
             </div>"""
             m.get_root().html.add_child(folium.Element(legend_html))
-            st_folium(m, width=800, height=500, returned_objects=[])
+            st_folium(m, width="100%", height=450, returned_objects=[])
 
         except ImportError:
             st.info("📦 To enable the interactive map, run: `pip install folium streamlit-folium`")
@@ -302,7 +308,7 @@ with tab2:
     st.header(c.TAB2_TITLE)
 
     st.info(
-        "📊 **What is this tab?** This section helps identify which patients are most at risk "
+        "This section helps identify which patients are most at risk "
         "of dropping out of HIV care (interrupting treatment). "
         "It uses logistic regression trained on Kenya DHS 2022 survey data (32,156 individuals). "
         "Enter a patient's profile to estimate their risk level and see which factors "
@@ -518,7 +524,7 @@ with tab3:
     st.caption("Scenario-based projection of IIT and VLS rates per county tier, 2025–2030")
 
     st.info(
-        "📊 **What is this tab?** This tab answers the question: "
+        "This tab answers the question: "
         "*What happens to Kenya's HIV programme by 2030?* "
         "It compares two futures:\n\n"
         "🔵 **Scenario A — Business as Usual:** Nothing changes. "
@@ -647,7 +653,7 @@ with tab3:
 
     st.subheader("📋 County Comparison (2025 Baseline)")
     st.info(
-        "📖 **What is this?** This table compares all 47 counties using 2025 data. "
+        "📖 This table compares all 47 counties using 2025 data. "
         "**Highest Risk Counties** have the largest Care Gap Index — meaning more patients "
         "are interrupting treatment and fewer are virally suppressed. These need help first. "
         "**Best Performing Counties** have the smallest gaps and are closest to the UNAIDS targets. "
