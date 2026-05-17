@@ -50,6 +50,10 @@ FORECAST_MODERATE = os.path.join(PROCESSED_DIR, "forecast_moderate.csv")
 FORECAST_LOW      = os.path.join(PROCESSED_DIR, "forecast_low.csv")
 FORECAST_NATIONAL = os.path.join(PROCESSED_DIR, "forecast_national.csv")
 
+# ── ADDITIONAL PROCESSED FILES
+COUNTY_COMPARISON = os.path.join(PROCESSED_DIR, "county_comparison.csv")  # from projection.py
+PATIENTS_RETAINED = os.path.join(PROCESSED_DIR, "patients_retained.csv")  # from projection.py
+
 # ── MODEL 2 OUTPUT FILES
 LOGREG_BASELINE_JSON  = os.path.join(PROCESSED_DIR, "logreg_baseline.json")
 DROPOUT_RISK_FACTORS  = os.path.join(PROCESSED_DIR, "dropout_risk_factors.csv")
