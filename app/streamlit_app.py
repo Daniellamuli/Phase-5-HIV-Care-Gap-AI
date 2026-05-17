@@ -25,6 +25,9 @@ st.set_page_config(
 )
 
 st.title("🏥 HIV Care Gap AI Dashboard")
+st.caption(
+    "Kenya HIV Care Gap AI · County Risk Mapping · Dropout Prediction · 2030 Scenario Forecasting"
+)
 st.markdown("---")
 
 
@@ -69,7 +72,7 @@ tab1, tab2, tab3 = st.tabs(
 # TAB 1: COUNTY TIER VISUALIZATION
 # ============================================================
 with tab1:
-    st.header("County Tier Visualization")
+    st.header(getattr(c, "TAB1_TITLE", "HIV Care Gap County Map"))
 
     if df_county is not None:
         # Dynamic Column Safe-Checks
@@ -107,7 +110,7 @@ with tab1:
 
         # Bar chart
         if cgi_col:
-            st.subheader("CGI Scores by County")
+            st.subheader("County Risk Stratification — Tier Distribution")
             df_sorted = df_county.sort_values(cgi_col, ascending=True)
             colors = (
                 [TIER_COLORS.get(t, "#808080") for t in df_sorted["tier"]]
@@ -252,221 +255,172 @@ with tab1:
         )
 
 # ============================================================
-# TAB 2: RISK CALCULATOR AND FACTORS (From Model 2)
+# TAB 2: DROPOUT RISK CALCULATOR (Eve Michelle — Day 5)
 # ============================================================
 with tab2:
     st.header(c.TAB2_TITLE)
     st.markdown(
-        "Enter a patient profile below to calculate their HIV care dropout "
-        "risk probability and see the top risk factors driving that score."
+        "Enter a patient profile below to estimate their HIV care dropout "
+        "risk profile and see the top risk factors from logistic regression odds ratio analysis."
     )
     st.markdown("---")
- 
-    # ── Load odds ratios with CI from constants path
+
+    # ── Load odds ratios with CI
     @st.cache_data
     def load_odds_ratios():
         if not os.path.exists(c.ODDS_RATIOS_CI_JSON):
             return None
+        import json
         with open(c.ODDS_RATIOS_CI_JSON, "r") as f:
-            import json
             return json.load(f)
- 
-    # ── Load XGBoost model — fall back to logistic regression proxy
+
+    # ── Load model bundle (logistic regression saved as xgboost_dropout.pkl)
     @st.cache_resource
     def load_dropout_model():
-        import joblib
+        import pickle
         if os.path.exists(c.XGBOOST_MODEL):
-            model = joblib.load(c.XGBOOST_MODEL)
-            return model, "XGBoost"
+            with open(c.XGBOOST_MODEL, "rb") as f:
+                model = pickle.load(f)
+            return model, "Logistic Regression"
         return None, "unavailable"
- 
+
     odds_data  = load_odds_ratios()
     model, model_name = load_dropout_model()
- 
-    # ── County list from constants (set() removes duplicates)
-    county_list = sorted(set(c.COUNTY_NAME_MAP.values()))
- 
-    # ── Age group options from constants
+
+    county_list      = sorted(set(c.COUNTY_NAME_MAP.values()))
     age_options      = list(c.DHS_AGE_GROUP_MAP.values())
     wealth_options   = list(c.DHS_WEALTH_MAP.values())
     edu_options      = list(c.DHS_EDUCATION_MAP.values())
     distance_options = [v for k, v in c.DHS_DISTANCE_MAP.items() if k != 998]
     marital_options  = list(c.DHS_MARITAL_MAP.values())
- 
+
     # ============================================================
-    # SECTION 1 — RISK CALCULATOR
+    # SECTION 1 — RISK PROFILE CALCULATOR
     # ============================================================
-    st.subheader("🧮 Patient Risk Calculator")
- 
+    st.subheader("🧮 Patient Risk Profile Calculator")
+
     if model_name == "unavailable":
         st.warning(
-            "⚠️ XGBoost model (`xgboost_dropout.pkl`) not found. "
+            "⚠️ Logistic Regression model not found. "
             "Run `scripts/train_model2.py` to generate it. "
             "Risk factor analysis below is still fully available."
         )
     else:
         st.caption(f"Model: {model_name}")
- 
+
     with st.form("risk_calculator_form"):
         col1, col2, col3 = st.columns(3)
- 
         with col1:
             county       = st.selectbox("County", county_list)
             age_group    = st.selectbox("Age Group", age_options)
- 
         with col2:
             wealth_index     = st.selectbox("Wealth Index", wealth_options)
             education_level  = st.selectbox("Education Level", edu_options)
- 
         with col3:
-            distance_to_facility = st.selectbox(
-                "Distance to Facility", distance_options
-            )
-            marital_status = st.selectbox("Marital Status", marital_options)
- 
-        submitted = st.form_submit_button(
-            "Calculate Dropout Risk", use_container_width=True
-        )
- 
+            distance_to_facility = st.selectbox("Distance to Facility", distance_options)
+            marital_status       = st.selectbox("Marital Status", marital_options)
+
+        submitted = st.form_submit_button("Calculate Risk Profile", use_container_width=True)
+
     if submitted:
         if model_name != "unavailable" and model is not None:
- 
-            # ── Build feature vector matching MODEL2_FEATURES
-            # Map inputs back to numeric codes
-            age_code      = [k for k, v in c.DHS_AGE_GROUP_MAP.items()
-                             if v == age_group][0]
-            marital_code  = [k for k, v in c.DHS_MARITAL_MAP.items()
-                             if v == marital_status][0]
-            dist_code     = [k for k, v in c.DHS_DISTANCE_MAP.items()
-                             if v == distance_to_facility][0]
-            county_code   = [k for k, v in c.DHS_COUNTY_MAP.items()
-                             if v == county][0] if hasattr(c, "DHS_COUNTY_MAP") else 1
- 
-            # One-hot encode education
-            edu_higher     = 1 if education_level == "Higher"       else 0
-            edu_no_edu     = 1 if education_level == "No education"  else 0
-            edu_primary    = 1 if education_level == "Primary"       else 0
-            edu_secondary  = 1 if education_level == "Secondary"     else 0
- 
-            # One-hot encode wealth
-            wealth_middle  = 1 if wealth_index == "Middle"   else 0
-            wealth_poorer  = 1 if wealth_index == "Poorer"   else 0
-            wealth_poorest = 1 if wealth_index == "Poorest"  else 0
-            wealth_richer  = 1 if wealth_index == "Richer"   else 0
-            wealth_richest = 1 if wealth_index == "Richest"  else 0
- 
             import numpy as np
+
+            age_code     = [k for k, v in c.DHS_AGE_GROUP_MAP.items() if v == age_group][0]
+            marital_code = [k for k, v in c.DHS_MARITAL_MAP.items() if v == marital_status][0]
+            dist_code    = [k for k, v in c.DHS_DISTANCE_MAP.items() if v == distance_to_facility][0]
+            county_code  = [k for k, v in c.DHS_COUNTY_MAP.items() if v == county][0] if hasattr(c, "DHS_COUNTY_MAP") else 1
+
+            edu_higher    = 1 if education_level == "Higher"      else 0
+            edu_no_edu    = 1 if education_level == "No education" else 0
+            edu_primary   = 1 if education_level == "Primary"      else 0
+            edu_secondary = 1 if education_level == "Secondary"    else 0
+
+            wealth_middle  = 1 if wealth_index == "Middle"  else 0
+            wealth_poorer  = 1 if wealth_index == "Poorer"  else 0
+            wealth_poorest = 1 if wealth_index == "Poorest" else 0
+            wealth_richer  = 1 if wealth_index == "Richer"  else 0
+            wealth_richest = 1 if wealth_index == "Richest" else 0
+
             feature_vector = np.array([[
-                county_code,    # county
-                age_code,       # age_group
-                marital_code,   # marital_status
-                dist_code,      # distance_to_facility
-                1,              # ever_tested_hiv (patient is in HIV care workflow)
-                1,              # tested_hiv_last_12months (patient is active in system)
-                0,              # num_sexual_partners (median default)
-                0,              # worked_last_12months
-                0,              # currently_in_union
-                edu_higher,
-                edu_no_edu,
-                edu_primary,
-                edu_secondary,
-                wealth_middle,
-                wealth_poorer,
-                wealth_poorest,
-                wealth_richer,
-                wealth_richest,
+                county_code, age_code, marital_code, dist_code,
+                1,  # ever_tested_hiv — patient is in HIV care workflow
+                1,  # tested_hiv_last_12months — patient is active in system
+                0,  # num_sexual_partners (median default)
+                0,  # worked_last_12months
+                0,  # currently_in_union
+                edu_higher, edu_no_edu, edu_primary, edu_secondary,
+                wealth_middle, wealth_poorer, wealth_poorest, wealth_richer, wealth_richest,
             ]])
- 
+
             try:
-                prob = model.predict_proba(feature_vector)[0][1]
+                # Get model from bundle if dict
+                actual_model = model['model'] if isinstance(model, dict) else model
+                prob = actual_model.predict_proba(feature_vector)[0][1]
                 pct  = prob * 100
- 
-                st.markdown("### 🎯 Dropout Risk Score")
- 
-                # Color-coded risk display
-                if pct >= 60:
-                    st.error(
-                        f"🔴 **HIGH RISK: {pct:.1f}%** — "
-                        f"Immediate follow-up recommended"
-                    )
-                    risk_color = "#C0392B"
-                elif pct >= 30:
-                    st.warning(
-                        f"🟠 **MODERATE RISK: {pct:.1f}%** — "
-                        f"Schedule follow-up within 30 days"
-                    )
-                    risk_color = "#E67E22"
-                else:
-                    st.success(
-                        f"🟢 **LOW RISK: {pct:.1f}%** — "
-                        f"Routine monitoring"
-                    )
-                    risk_color = "#27AE60"
- 
-                # Risk gauge bar
-                st.progress(int(min(pct, 100)))
+
+                st.markdown("### 🎯 Estimated Dropout Risk Profile")
                 st.caption(
-                    f"Risk probability: {pct:.2f}% | "
-                    f"Model: {model_name} | "
-                    f"Threshold: 30% = moderate, 60% = high"
+                    "Based on logistic regression odds ratio analysis — "
+                    "this is a population-level risk indicator, not an individual clinical prediction."
                 )
- 
+
+                if pct >= 60:
+                    st.error(f"🔴 **Elevated Risk Profile: {pct:.1f}%** — Priority follow-up recommended")
+                elif pct >= 30:
+                    st.warning(f"🟠 **Moderate Risk Profile: {pct:.1f}%** — Schedule follow-up within 30 days")
+                else:
+                    st.success(f"🟢 **Lower Risk Profile: {pct:.1f}%** — Routine monitoring")
+
+                st.progress(int(min(pct, 100)))
+                st.caption(f"Estimated likelihood: {pct:.2f}% | Model: {model_name}")
+
             except Exception as e:
                 st.error(f"Prediction error: {e}")
         else:
-            st.info(
-                "Risk calculator requires `xgboost_dropout.pkl`. "
-                "Risk factor analysis below is still available."
-            )
- 
+            st.info("Risk profile calculator requires the trained model. Risk factor analysis below is still available.")
+
     st.markdown("---")
- 
+
     # ============================================================
     # SECTION 2 — TOP 5 RISK FACTORS WITH CIs
     # ============================================================
     st.subheader("📊 Top 5 Risk Factors for HIV Care Dropout")
     st.caption(
         "Odds ratios with 95% bootstrap confidence intervals — "
-        "from Logistic Regression (Kenya DHS 2022, n=32,156)"
+        "Logistic Regression (Kenya DHS 2022, n=32,156)"
     )
- 
+
     if odds_data is None:
         st.warning(
             f"⚠️ `odds_ratios_with_ci.json` not found. "
             f"Run `06_model_2_dropout_prediction.ipynb` to generate it."
         )
     else:
-        # ── Pull top 5 risk factors (OR > 1, sorted descending)
         all_features = odds_data.get("features", [])
         top5 = sorted(
             [f for f in all_features if f["Odds_Ratio"] > 1],
-            key=lambda x: x["Odds_Ratio"],
-            reverse=True
+            key=lambda x: x["Odds_Ratio"], reverse=True
         )[:5]
- 
+
         if top5:
-            # ── Forest plot with CI error bars
             features   = [f["Feature"]    for f in top5]
             ors        = [f["Odds_Ratio"] for f in top5]
             ci_lower   = [f["CI_Lower"]   for f in top5]
             ci_upper   = [f["CI_Upper"]   for f in top5]
- 
-            # Cap x-axis — ever_tested_hiv CI_Upper is 6500
-            # Display capped at 40 for readability; value shown in table
-            X_CAP = 40
-            ors_plot      = [min(o, X_CAP)       for o in ors]
-            ci_upper_plot = [min(u, X_CAP)       for u in ci_upper]
-            ci_lower_plot = [max(l, 0)            for l in ci_lower]
- 
-            xerr_lower = [o - l for o, l in zip(ors_plot, ci_lower_plot)]
-            xerr_upper = [u - o for u, o in zip(ci_upper_plot, ors_plot)]
- 
+
+            X_CAP         = 40
+            ors_plot      = [min(o, X_CAP) for o in ors]
+            ci_upper_plot = [min(u, X_CAP) for u in ci_upper]
+            ci_lower_plot = [max(l, 0)     for l in ci_lower]
+            xerr_lower    = [o - l for o, l in zip(ors_plot, ci_lower_plot)]
+            xerr_upper    = [u - o for u, o in zip(ci_upper_plot, ors_plot)]
+
             fig, ax = plt.subplots(figsize=(10, 5))
             fig.patch.set_facecolor("#0F1117")
             ax.set_facecolor("#1E2130")
- 
+
             colors_risk = ["#C0392B" if o >= 2 else "#E67E22" for o in ors]
- 
             ax.barh(
                 features, ors_plot,
                 xerr=[xerr_lower, xerr_upper],
@@ -474,98 +428,65 @@ with tab2:
                 error_kw=dict(ecolor="white", capsize=5, linewidth=1.5),
                 height=0.5,
             )
-            ax.axvline(x=1, color="white", linestyle="--",
-                       linewidth=1, label="No effect (OR=1)")
+            ax.axvline(x=1, color="white", linestyle="--", linewidth=1, label="No effect (OR=1)")
             ax.set_xlabel("Odds Ratio (95% CI)", color="white", fontsize=11)
-            ax.set_title(
-                "Top 5 Risk Factors for HIV Care Dropout",
-                color="white", fontsize=13, fontweight="bold", pad=12
-            )
+            ax.set_title("Top 5 Risk Factors for HIV Care Dropout", color="white",
+                         fontsize=13, fontweight="bold", pad=12)
             ax.tick_params(colors="white")
             ax.set_xlim(0, X_CAP)
             for sp in ax.spines.values():
                 sp.set_edgecolor("#2C3E50")
-            ax.legend(
-                facecolor="#1E2130", edgecolor="#2C3E50",
-                labelcolor="white", fontsize=9
-            )
- 
-            # Annotate OR values on bars
-            for i, (feature, or_val, cap_val) in enumerate(
-                zip(features, ors, ors_plot)
-            ):
-                label = (
-                    f"OR={or_val:.2f} ⚠ capped at {X_CAP}"
-                    if or_val > X_CAP
-                    else f"OR={or_val:.2f}"
-                )
-                ax.text(
-                    cap_val + 0.3, i, label,
-                    va="center", color="white", fontsize=8.5
-                )
- 
+            ax.legend(facecolor="#1E2130", edgecolor="#2C3E50", labelcolor="white", fontsize=9)
+
+            for i, (feature, or_val, cap_val) in enumerate(zip(features, ors, ors_plot)):
+                label = f"OR={or_val:.2f} ⚠ capped" if or_val > X_CAP else f"OR={or_val:.2f}"
+                ax.text(cap_val + 0.3, i, label, va="center", color="white", fontsize=8.5)
+
             plt.tight_layout()
             st.pyplot(fig)
             plt.close(fig)
- 
-            # ── Risk factors table
+
             st.markdown("#### Risk Factor Summary Table")
             table_data = []
             for f in top5:
                 ci_note = (
-                    f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.1f}]"
+                    f"[{f['CI_Lower']:.3f}, >40]"
                     if f["CI_Upper"] > X_CAP
                     else f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.3f}]"
                 )
                 table_data.append({
-                    "Risk Factor":        f["Feature"],
-                    "Odds Ratio":         f"{f['Odds_Ratio']:.3f}",
-                    "95% CI":             ci_note,
-                    "Interpretation":     (
-                        "🔴 Strong risk factor"
-                        if f["Odds_Ratio"] >= 5
-                        else "🟠 Moderate risk factor"
-                        if f["Odds_Ratio"] >= 2
+                    "Risk Factor":    f["Feature"],
+                    "Odds Ratio":     f"{f['Odds_Ratio']:.3f}",
+                    "95% CI":         ci_note,
+                    "Interpretation": (
+                        "🔴 Strong risk factor"   if f["Odds_Ratio"] >= 5
+                        else "🟠 Moderate risk factor" if f["Odds_Ratio"] >= 2
                         else "🟡 Mild risk factor"
                     ),
                 })
-            st.dataframe(
-                pd.DataFrame(table_data),
-                use_container_width=True,
-                hide_index=True,
-            )
- 
-        # ── Protective factors section
+            st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
+
         st.markdown("---")
         st.subheader("🛡️ Protective Factors (OR < 1)")
         st.caption("Features associated with lower dropout risk")
- 
         protective = sorted(
             [f for f in all_features if f["Odds_Ratio"] < 1
              and f["Feature"] != "tested_hiv_last_12months"],
             key=lambda x: x["Odds_Ratio"]
         )[:5]
- 
+
         if protective:
-            prot_data = []
-            for f in protective:
-                prot_data.append({
-                    "Protective Factor": f["Feature"],
-                    "Odds Ratio":        f"{f['Odds_Ratio']:.3f}",
-                    "95% CI":            f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.3f}]",
-                    "Risk Reduction":    f"{(1 - f['Odds_Ratio']) * 100:.0f}% lower risk",
-                })
-            st.dataframe(
-                pd.DataFrame(prot_data),
-                use_container_width=True,
-                hide_index=True,
-            )
- 
+            prot_data = [{
+                "Protective Factor": f["Feature"],
+                "Odds Ratio":        f"{f['Odds_Ratio']:.3f}",
+                "95% CI":            f"[{f['CI_Lower']:.3f}, {f['CI_Upper']:.3f}]",
+                "Risk Reduction":    f"{(1 - f['Odds_Ratio']) * 100:.0f}% lower risk",
+            } for f in protective]
+            st.dataframe(pd.DataFrame(prot_data), use_container_width=True, hide_index=True)
+
     st.markdown("---")
- 
-    # ── Model performance summary
     st.subheader("📈 Model Performance")
- 
+
     @st.cache_data
     def load_logreg_baseline():
         import json
@@ -573,38 +494,34 @@ with tab2:
             return None
         with open(c.LOGREG_BASELINE_JSON, "r") as f:
             return json.load(f)
- 
+
     baseline = load_logreg_baseline()
     if baseline:
         m1, m2, m3, m4 = st.columns(4)
-        with m1:
-            st.metric("AUC-ROC",   f"{baseline.get('auc_roc', 0):.4f}")
-        with m2:
-            st.metric("Recall",    f"{baseline.get('recall', 0):.4f}")
-        with m3:
-            st.metric("Precision", f"{baseline.get('precision', 0):.4f}")
-        with m4:
-            st.metric("F1 Score",  f"{baseline.get('f1', 0):.4f}")
- 
+        with m1: st.metric("AUC-ROC",   f"{baseline.get('auc_roc', 0):.4f}")
+        with m2: st.metric("Recall",    f"{baseline.get('recall', 0):.4f}")
+        with m3: st.metric("Precision", f"{baseline.get('precision', 0):.4f}")
+        with m4: st.metric("F1 Score",  f"{baseline.get('f1', 0):.4f}")
+
         with st.expander("ℹ️ Model Notes"):
             st.markdown(f"""
-            **Model:** {baseline.get('model', 'Logistic Regression')}
-            **Features used:** {baseline.get('total_features', 18)}
-            **Training data:** Kenya DHS 2022 Individual Recode (n=32,156)
-            **Dropout cases:** Only 26 confirmed dropouts (0.08% prevalence)
-            **Key limitation:** Extremely low dropout prevalence means
-            precision is low — recall is the primary metric for this
-            public health use case (missing a high-risk patient is worse
-            than a false alarm).
+**Model:** Logistic Regression (balanced class weights)
+**Training data:** Kenya DHS 2022 Individual Recode (n=32,156)
+**Dropout cases:** Only 26 confirmed dropouts (0.08% prevalence)
+**Key limitation:** Extremely low dropout prevalence means precision is low.
+Recall is the primary metric — missing a high-risk patient is a worse error than a false alarm.
+**Note on `ever_tested_hiv` OR:** Wide CI [0.038, 6,500] is a known limitation —
+nearly all 26 dropouts share the same value for this feature, making bootstrap unstable.
             """)
     else:
         st.info("Run `06_model_2_dropout_prediction.ipynb` to generate model metrics.")
 
 # ============================================================
-# TAB 3: SCENARIO PROJECTIONS
+# TAB 3: SCENARIO PROJECTIONS (Lorenah + fixes)
 # ============================================================
 with tab3:
-    st.header("📈 Scenario Projections (2025-2030)")
+    st.header(getattr(c, "TAB3_TITLE", "2030 Forecast"))
+    st.caption("Scenario-based projection of IIT and VLS rates per county tier, 2025–2030")
 
     # Load all forecast files
     @st.cache_data
@@ -613,15 +530,15 @@ with tab3:
         for tier in ["Critical", "High", "Moderate", "Low"]:
             file_map = {
                 "Critical": getattr(c, "FORECAST_CRITICAL", ""),
-                "High": getattr(c, "FORECAST_HIGH", ""),
+                "High":     getattr(c, "FORECAST_HIGH", ""),
                 "Moderate": getattr(c, "FORECAST_MODERATE", ""),
-                "Low": getattr(c, "FORECAST_LOW", ""),
+                "Low":      getattr(c, "FORECAST_LOW", ""),
             }
             path = file_map.get(tier, "")
             if path and os.path.exists(path):
                 try:
                     forecasts[tier] = pd.read_csv(path)
-                except Exception as e:
+                except Exception:
                     forecasts[tier] = pd.DataFrame()
             else:
                 forecasts[tier] = pd.DataFrame()
@@ -636,128 +553,155 @@ with tab3:
         if path and os.path.exists(path):
             try:
                 return pd.read_csv(path)
-            except:
+            except Exception:
                 return pd.DataFrame()
         return pd.DataFrame()
 
     national_df = load_national_forecast()
 
-    # Task: 4 dual-scenario line charts
+    # ── 4 dual-scenario IIT line charts per tier
     st.subheader("📊 IIT Rate Projections by Tier")
 
     for tier in ["Critical", "High", "Moderate", "Low"]:
         df_tier = forecasts.get(tier, pd.DataFrame())
         if df_tier is not None and not df_tier.empty:
             st.markdown(f"### {tier} Tier")
-
             fig, ax = plt.subplots(figsize=(10, 4))
 
-            # Scenario A
             df_a = df_tier[df_tier["scenario"] == "A"]
-            if not df_a.empty:
-                ax.plot(
-                    df_a["year"],
-                    df_a["iit_rate"],
-                    "o--",
-                    color="blue",
-                    linewidth=2,
-                    label="Scenario A (Business as Usual)",
-                )
-
-            # Scenario B
             df_b = df_tier[df_tier["scenario"] == "B"]
+
+            if not df_a.empty:
+                ax.plot(df_a["year"], df_a["iit_rate"], "o--", color="blue",
+                        linewidth=2, label="Scenario A (Business as Usual)")
             if not df_b.empty:
-                ax.plot(
-                    df_b["year"],
-                    df_b["iit_rate"],
-                    "s-",
-                    color="red",
-                    linewidth=2,
-                    label="Scenario B (30% Reduction)",
-                )
+                ax.plot(df_b["year"], df_b["iit_rate"], "s-", color="red",
+                        linewidth=2, label="Scenario B (30% IIT Reduction)")
 
             ax.set_xlabel("Year")
             ax.set_ylabel("IIT Rate")
-            ax.set_title(f"{tier} Tier - IIT Rate Projections", fontweight="bold")
+            ax.set_title(f"{tier} Tier — IIT Rate Projections 2025–2030", fontweight="bold")
+            ax.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
             ax.legend()
             ax.grid(True, alpha=0.3)
             st.pyplot(fig)
+            plt.close(fig)
 
-    # Task: National headline chart
-    st.subheader("🇰🇪 National Projections")
+    # ── National IIT headline chart
+    st.subheader("🇰🇪 National IIT Rate Projections")
 
     if not national_df.empty:
         fig2, ax2 = plt.subplots(figsize=(10, 4))
-
         df_nat_a = national_df[national_df["scenario"] == "A"]
         df_nat_b = national_df[national_df["scenario"] == "B"]
 
         if not df_nat_a.empty:
-            ax2.plot(
-                df_nat_a["year"],
-                df_nat_a["iit_rate"],
-                "o--",
-                color="blue",
-                linewidth=2,
-                label="Scenario A (Business as Usual)",
-            )
-
+            ax2.plot(df_nat_a["year"], df_nat_a["iit_rate"], "o--", color="blue",
+                     linewidth=2, label="Scenario A (Business as Usual)")
         if not df_nat_b.empty:
-            ax2.plot(
-                df_nat_b["year"],
-                df_nat_b["iit_rate"],
-                "s-",
-                color="red",
-                linewidth=2,
-                label="Scenario B (30% Reduction)",
-            )
+            ax2.plot(df_nat_b["year"], df_nat_b["iit_rate"], "s-", color="red",
+                     linewidth=2, label="Scenario B (30% Reduction)")
 
         ax2.set_xlabel("Year")
         ax2.set_ylabel("IIT Rate")
-        ax2.set_title("Kenya National IIT Rate Projections", fontweight="bold")
+        ax2.set_title("Kenya National IIT Rate Projections 2025–2030", fontweight="bold")
+        ax2.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
         ax2.legend()
         ax2.grid(True, alpha=0.3)
         st.pyplot(fig2)
+        plt.close(fig2)
 
         if not df_nat_b.empty and not df_nat_a.empty:
             final_b = df_nat_b[df_nat_b["year"] == 2030]["iit_rate"].values
             final_a = df_nat_a[df_nat_a["year"] == 2030]["iit_rate"].values
             if len(final_b) > 0 and len(final_a) > 0:
                 reduction = (final_a[0] - final_b[0]) / final_a[0] * 100
-                st.success(
-                    f"📉 Scenario B reduces national IIT rate by {reduction:.0f}% by 2030"
-                )
+                st.success(f"📉 Scenario B reduces national IIT rate by {reduction:.0f}% by 2030")
 
-    # Cross-sectional comparison table
+    # ── National VLS chart (new)
+    st.subheader("🇰🇪 National VLS Rate Projections")
+
+    if not national_df.empty and "vls_rate_adult" in national_df.columns:
+        fig3, ax3 = plt.subplots(figsize=(10, 4))
+        df_nat_a = national_df[national_df["scenario"] == "A"]
+        df_nat_b = national_df[national_df["scenario"] == "B"]
+
+        if not df_nat_a.empty:
+            ax3.plot(df_nat_a["year"], df_nat_a["vls_rate_adult"], "o--", color="blue",
+                     linewidth=2, label="Scenario A (Business as Usual)")
+        if not df_nat_b.empty:
+            ax3.plot(df_nat_b["year"], df_nat_b["vls_rate_adult"], "s-", color="green",
+                     linewidth=2, label="Scenario B (Bridged Gap)")
+
+        # UNAIDS 95% target dotted line
+        ax3.axhline(y=0.95, color="orange", linestyle=":", linewidth=2,
+                    label="UNAIDS 95% VLS Target")
+
+        ax3.set_xlabel("Year")
+        ax3.set_ylabel("VLS Rate")
+        ax3.set_title("Kenya National VLS Rate Projections 2025–2030", fontweight="bold")
+        ax3.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
+        ax3.set_ylim(0.85, 1.0)
+        ax3.legend()
+        ax3.grid(True, alpha=0.3)
+        st.pyplot(fig3)
+        plt.close(fig3)
+
+    # ── Patients retained counter
+    st.subheader("🏥 Patients Additionally Retained Under Scenario B")
+
+    patients_retained_path = c.PATIENTS_RETAINED
+    if os.path.exists(patients_retained_path):
+        pr_df = pd.read_csv(patients_retained_path)
+        total_saved = pr_df["patients_saved"].sum() if "patients_saved" in pr_df.columns else 0
+
+        st.metric(
+            "Total Additional Patients Retained by 2030",
+            f"{int(total_saved):,}",
+            delta="Scenario B vs Business as Usual"
+        )
+
+        if "tier" in pr_df.columns and "patients_saved" in pr_df.columns:
+            tier_saved = (
+                pr_df.groupby("tier")["patients_saved"]
+                .sum()
+                .reset_index()
+                .rename(columns={"patients_saved": "Total Patients Retained"})
+                .sort_values("Total Patients Retained", ascending=False)
+            )
+            st.dataframe(tier_saved, use_container_width=True, hide_index=True)
+    else:
+        st.info("Run `scripts/train_model3.py` to generate patients_retained.csv")
+
+    # ── Cross-sectional comparison table (sort direction fixed)
     if df_county is not None:
         st.subheader("📋 County Comparison (2025 Baseline)")
         col_worst, col_best = st.columns(2)
 
         cgi_col = (
-            "cgi_score"
-            if "cgi_score" in df_county.columns
-            else ("care_gap_index" if "care_gap_index" in df_county.columns else None)
+            "cgi_score" if "cgi_score" in df_county.columns
+            else "care_gap_index" if "care_gap_index" in df_county.columns
+            else None
         )
 
         if cgi_col:
-            # Reusable sub-columns list checking
             sub_cols = ["county", "tier", cgi_col]
-            if "iit_rate_pct" in df_county.columns:
-                sub_cols.append("iit_rate_pct")
-            elif "iit_rate" in df_county.columns:
+            if "iit_rate" in df_county.columns:
                 sub_cols.append("iit_rate")
 
             with col_worst:
-                st.markdown("**🔴 Highest Risk Counties (Worst/Lowest CGI)**")
-                top_worst = df_county.nsmallest(10, cgi_col)[sub_cols]
+                st.markdown("**🔴 Highest Risk Counties (Highest CGI)**")
+                # CGI is a gap score — highest CGI = worst gap
+                top_worst = df_county.nlargest(10, cgi_col)[sub_cols]
                 st.dataframe(top_worst, use_container_width=True)
 
             with col_best:
-                st.markdown("**🟢 Best Performing Counties (Highest CGI)**")
-                top_best = df_county.nlargest(10, cgi_col)[sub_cols]
+                st.markdown("**🟢 Best Performing Counties (Lowest CGI)**")
+                # Lowest CGI = smallest gap = best performing
+                top_best = df_county.nsmallest(10, cgi_col)[sub_cols]
                 st.dataframe(top_best, use_container_width=True)
 
-    # CSV download button
+    # ── CSV download
     st.subheader("📥 Export Projection Data")
     all_projections = []
     for tier, df_tier in forecasts.items():
@@ -776,10 +720,34 @@ with tab3:
             mime="text/csv",
         )
 
-    # Tooltips / Info
+    # ── About + Retraining note
     with st.expander("ℹ️ About This Dashboard"):
         st.markdown("""
-        **Data Sources:**
-        - County profiles: NSDCC 2025 data integration layer
-        - Projections: Scenario-based forecasting engine
+**Data Sources:**
+- County profiles: NSDCC 2025 raw programme data (47 counties)
+- Projections: Scenario-based linear projection (2025–2030)
+
+**Scenarios:**
+- **Scenario A (BAU):** Current IIT rates remain constant through 2030
+- **Scenario B (Bridged Gap):** 30% reduction in IIT rates for Critical/High tiers from 2026
+
+**CGI (Care Gap Index):**
+Weighted composite: IIT rate (40%) + inverse VLS rate (40%) + HTS positivity (20%).
+Higher CGI = larger care gap = higher priority for intervention.
+
+**UNAIDS 95% Target:** VLS rate of 95% or above by 2030 (95-95-95 global target).
+
+**Model retraining:** When new NSDCC data is available, run:
+```
+python scripts/train_model3.py
+python app/trigger_alerts.py
+```
         """)
+
+# ============================================================
+# FOOTER
+# ============================================================
+st.markdown("---")
+st.caption(
+    "Built using Kenya DHS 2022 + NSDCC 2025 programme data · DSF-FT15 Phase 5 Capstone"
+)
