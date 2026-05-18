@@ -710,14 +710,13 @@ def run_model2() -> None:
         json.dump(results, f, indent=2)
     print(f"  Saved → {logreg_path}")
 
-    # ── XGBoost (secondary) ───────────────────────────────────────────
-    try:
-        from src.model_training import train_xgboost, save_model
-        xgb_model = train_xgboost(X_train, y_train)
-        save_model(xgb_model, XGBOOST_MODEL)
-        print(f"  XGBoost saved → {XGBOOST_MODEL}")
-    except Exception as e:
-        print(f"  XGBoost skipped: {e}")
+    # ── XGBoost (NOT IMPLEMENTED) ─────────────────────────────────────
+    # Due to extreme class imbalance (26 dropout cases / 32,156 total),
+    # XGBoost is not used. The model cannot learn meaningful patterns
+    # from only 26 positive cases. Logistic Regression is used instead
+    # for risk factor identification (odds ratios).
+    print(f"\n  NOTE: XGBoost skipped — insufficient positive cases ({int(y.sum())})")
+    print(f"        Logistic Regression used for risk factor analysis only.")
 
 
 # ══════════════════════════════════════════════════════════════════════════

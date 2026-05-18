@@ -4,272 +4,264 @@
   "bootstrap_samples": 500,
   "features": [
     {
-      "Feature": "ever_tested_hiv",
-      "Coefficient": 3.557808573263667,
-      "Odds_Ratio": 35.086,
-      "CI_Lower": 0.038,
-      "CI_Upper": 6500.885,
-      "CI_Range": 6500.846792955191
-    },
-    {
       "Feature": "edu_No education",
-      "Coefficient": 0.9746979571370372,
-      "Odds_Ratio": 2.65,
-      "CI_Lower": 0.47,
-      "CI_Upper": 72.233,
-      "CI_Range": 71.76263106716469
-    },
-    {
-      "Feature": "age_group",
-      "Coefficient": 0.39965382901111857,
-      "Odds_Ratio": 1.491,
-      "CI_Lower": 0.912,
-      "CI_Upper": 2.898,
-      "CI_Range": 1.9864024416398522
-    },
-    {
-      "Feature": "marital_status",
-      "Coefficient": 0.3771141281704963,
-      "Odds_Ratio": 1.458,
-      "CI_Lower": 0.406,
-      "CI_Upper": 4.124,
-      "CI_Range": 3.7184396994433166
-    },
-    {
-      "Feature": "currently_in_union",
-      "Coefficient": 0.27719918660518056,
-      "Odds_Ratio": 1.319,
-      "CI_Lower": 0.249,
-      "CI_Upper": 5.749,
-      "CI_Range": 5.500582776281134
+      "Coefficient": 1.8337624717707024,
+      "Odds_Ratio": 6.257,
+      "CI_Lower": 1.117,
+      "CI_Upper": 103.983,
+      "CI_Range": 102.86602251122201
     },
     {
       "Feature": "wealth_Richest",
-      "Coefficient": 0.17550672459295663,
-      "Odds_Ratio": 1.192,
-      "CI_Lower": 0.07,
-      "CI_Upper": 11.57,
-      "CI_Range": 11.500077766351303
+      "Coefficient": 0.9510021682720563,
+      "Odds_Ratio": 2.588,
+      "CI_Lower": 0.383,
+      "CI_Upper": 16.327,
+      "CI_Range": 15.943851650929478
     },
     {
-      "Feature": "wealth_Poorer",
-      "Coefficient": 0.11226978069443078,
-      "Odds_Ratio": 1.119,
-      "CI_Lower": 0.005,
-      "CI_Upper": 15.321,
-      "CI_Range": 15.316219678880227
+      "Feature": "currently_in_union",
+      "Coefficient": 0.9151315233214856,
+      "Odds_Ratio": 2.497,
+      "CI_Lower": 0.88,
+      "CI_Upper": 8.467,
+      "CI_Range": 7.587513973170716
+    },
+    {
+      "Feature": "age_group",
+      "Coefficient": 0.3875448405662854,
+      "Odds_Ratio": 1.473,
+      "CI_Lower": 0.976,
+      "CI_Upper": 2.56,
+      "CI_Range": 1.58416105952359
     },
     {
       "Feature": "wealth_Middle",
-      "Coefficient": 0.04929508671853962,
-      "Odds_Ratio": 1.051,
-      "CI_Lower": 0.024,
-      "CI_Upper": 12.656,
-      "CI_Range": 12.632299771672347
+      "Coefficient": 0.37294913200111257,
+      "Odds_Ratio": 1.452,
+      "CI_Lower": 0.135,
+      "CI_Upper": 8.852,
+      "CI_Range": 8.717589468658987
     },
     {
-      "Feature": "edu_Higher",
-      "Coefficient": 0.03271482082444632,
-      "Odds_Ratio": 1.033,
-      "CI_Lower": 0.006,
-      "CI_Upper": 7.618,
-      "CI_Range": 7.612467972146497
-    },
-    {
-      "Feature": "num_sexual_partners",
-      "Coefficient": 0.019776484763721257,
-      "Odds_Ratio": 1.02,
-      "CI_Lower": 0.072,
-      "CI_Upper": 1.107,
-      "CI_Range": 1.0354573782867607
-    },
-    {
-      "Feature": "worked_last_12months",
-      "Coefficient": 0.019717977346923467,
-      "Odds_Ratio": 1.02,
-      "CI_Lower": 0.371,
-      "CI_Upper": 2.828,
-      "CI_Range": 2.4567135193811267
+      "Feature": "marital_status",
+      "Coefficient": 0.1108709020413035,
+      "Odds_Ratio": 1.117,
+      "CI_Lower": 0.505,
+      "CI_Upper": 2.603,
+      "CI_Range": 2.0975815493309264
     },
     {
       "Feature": "county",
-      "Coefficient": -0.018410927883163546,
-      "Odds_Ratio": 0.982,
-      "CI_Lower": 0.921,
-      "CI_Upper": 1.033,
-      "CI_Range": 0.11245489929816932
+      "Coefficient": -0.0010452309673356312,
+      "Odds_Ratio": 0.999,
+      "CI_Lower": 0.952,
+      "CI_Upper": 1.043,
+      "CI_Range": 0.09112949424884842
     },
     {
-      "Feature": "edu_Secondary",
-      "Coefficient": -0.08011637125770363,
-      "Odds_Ratio": 0.923,
-      "CI_Lower": 0.19,
-      "CI_Upper": 10.773,
-      "CI_Range": 10.58251354623418
+      "Feature": "num_sexual_partners",
+      "Coefficient": -0.013259049600360326,
+      "Odds_Ratio": 0.987,
+      "CI_Lower": 0.287,
+      "CI_Upper": 1.066,
+      "CI_Range": 0.7794142349644246
     },
     {
-      "Feature": "wealth_Richer",
-      "Coefficient": -0.12828566511149306,
-      "Odds_Ratio": 0.88,
-      "CI_Lower": 0.026,
-      "CI_Upper": 10.104,
-      "CI_Range": 10.078155046868497
+      "Feature": "wealth_Poorer",
+      "Coefficient": -0.027058016090404653,
+      "Odds_Ratio": 0.973,
+      "CI_Lower": 0.004,
+      "CI_Upper": 14.229,
+      "CI_Range": 14.225152991165286
     },
     {
-      "Feature": "distance_to_facility",
-      "Coefficient": -0.2709639845699512,
-      "Odds_Ratio": 0.763,
-      "CI_Lower": 0.129,
-      "CI_Upper": 2.097,
-      "CI_Range": 1.968159269697896
-    },
-    {
-      "Feature": "wealth_Poorest",
-      "Coefficient": -0.29941731830093227,
-      "Odds_Ratio": 0.741,
-      "CI_Lower": 0.193,
-      "CI_Upper": 8.062,
-      "CI_Range": 7.868524942938995
+      "Feature": "worked_last_12months",
+      "Coefficient": -0.09588255226274517,
+      "Odds_Ratio": 0.909,
+      "CI_Lower": 0.376,
+      "CI_Upper": 1.768,
+      "CI_Range": 1.3919219641129237
     },
     {
       "Feature": "edu_Primary",
-      "Coefficient": -1.0179277981100032,
-      "Odds_Ratio": 0.361,
-      "CI_Lower": 0.05,
-      "CI_Upper": 2.605,
-      "CI_Range": 2.5552305223469376
+      "Coefficient": -0.160345220970977,
+      "Odds_Ratio": 0.852,
+      "CI_Lower": 0.14,
+      "CI_Upper": 4.03,
+      "CI_Range": 3.8896271887500817
     },
     {
-      "Feature": "tested_hiv_last_12months",
-      "Coefficient": -10.699577538971393,
-      "Odds_Ratio": 0.0,
+      "Feature": "wealth_Richer",
+      "Coefficient": -0.17612574766885605,
+      "Odds_Ratio": 0.839,
+      "CI_Lower": 0.12,
+      "CI_Upper": 8.865,
+      "CI_Range": 8.744740517977188
+    },
+    {
+      "Feature": "edu_Secondary",
+      "Coefficient": -0.36686352512802844,
+      "Odds_Ratio": 0.693,
+      "CI_Lower": 0.121,
+      "CI_Upper": 7.932,
+      "CI_Range": 7.810819199264431
+    },
+    {
+      "Feature": "distance_to_facility",
+      "Coefficient": -0.46016951393385935,
+      "Odds_Ratio": 0.631,
+      "CI_Lower": 0.072,
+      "CI_Upper": 2.77,
+      "CI_Range": 2.6980347032480885
+    },
+    {
+      "Feature": "wealth_Poorest",
+      "Coefficient": -0.5763985411071209,
+      "Odds_Ratio": 0.562,
+      "CI_Lower": 0.167,
+      "CI_Upper": 3.425,
+      "CI_Range": 3.258186394488122
+    },
+    {
+      "Feature": "edu_Higher",
+      "Coefficient": -0.7621847302647203,
+      "Odds_Ratio": 0.467,
+      "CI_Lower": 0.002,
+      "CI_Upper": 6.407,
+      "CI_Range": 6.404888166542597
+    },
+    {
+      "Feature": "ever_tested_hiv",
+      "Coefficient": -2.2682749460286122,
+      "Odds_Ratio": 0.103,
       "CI_Lower": 0.0,
-      "CI_Upper": 0.0,
-      "CI_Range": 0.00010468222163410445
+      "CI_Upper": 0.321,
+      "CI_Range": 0.3213245606454598
     }
   ],
   "top_risk_factors": [
     {
-      "Feature": "ever_tested_hiv",
-      "Odds_Ratio": 35.086,
-      "CI_Lower": 0.038,
-      "CI_Upper": 6500.885
-    },
-    {
       "Feature": "edu_No education",
-      "Odds_Ratio": 2.65,
-      "CI_Lower": 0.47,
-      "CI_Upper": 72.233
-    },
-    {
-      "Feature": "age_group",
-      "Odds_Ratio": 1.491,
-      "CI_Lower": 0.912,
-      "CI_Upper": 2.898
-    },
-    {
-      "Feature": "marital_status",
-      "Odds_Ratio": 1.458,
-      "CI_Lower": 0.406,
-      "CI_Upper": 4.124
-    },
-    {
-      "Feature": "currently_in_union",
-      "Odds_Ratio": 1.319,
-      "CI_Lower": 0.249,
-      "CI_Upper": 5.749
+      "Odds_Ratio": 6.257,
+      "CI_Lower": 1.117,
+      "CI_Upper": 103.983
     },
     {
       "Feature": "wealth_Richest",
-      "Odds_Ratio": 1.192,
-      "CI_Lower": 0.07,
-      "CI_Upper": 11.57
+      "Odds_Ratio": 2.588,
+      "CI_Lower": 0.383,
+      "CI_Upper": 16.327
     },
     {
-      "Feature": "wealth_Poorer",
-      "Odds_Ratio": 1.119,
-      "CI_Lower": 0.005,
-      "CI_Upper": 15.321
+      "Feature": "currently_in_union",
+      "Odds_Ratio": 2.497,
+      "CI_Lower": 0.88,
+      "CI_Upper": 8.467
+    },
+    {
+      "Feature": "age_group",
+      "Odds_Ratio": 1.473,
+      "CI_Lower": 0.976,
+      "CI_Upper": 2.56
     },
     {
       "Feature": "wealth_Middle",
-      "Odds_Ratio": 1.051,
-      "CI_Lower": 0.024,
-      "CI_Upper": 12.656
+      "Odds_Ratio": 1.452,
+      "CI_Lower": 0.135,
+      "CI_Upper": 8.852
     },
     {
-      "Feature": "edu_Higher",
-      "Odds_Ratio": 1.033,
-      "CI_Lower": 0.006,
-      "CI_Upper": 7.618
+      "Feature": "marital_status",
+      "Odds_Ratio": 1.117,
+      "CI_Lower": 0.505,
+      "CI_Upper": 2.603
+    },
+    {
+      "Feature": "county",
+      "Odds_Ratio": 0.999,
+      "CI_Lower": 0.952,
+      "CI_Upper": 1.043
     },
     {
       "Feature": "num_sexual_partners",
-      "Odds_Ratio": 1.02,
-      "CI_Lower": 0.072,
-      "CI_Upper": 1.107
+      "Odds_Ratio": 0.987,
+      "CI_Lower": 0.287,
+      "CI_Upper": 1.066
+    },
+    {
+      "Feature": "wealth_Poorer",
+      "Odds_Ratio": 0.973,
+      "CI_Lower": 0.004,
+      "CI_Upper": 14.229
+    },
+    {
+      "Feature": "worked_last_12months",
+      "Odds_Ratio": 0.909,
+      "CI_Lower": 0.376,
+      "CI_Upper": 1.768
     }
   ],
   "protective_factors": [
     {
-      "Feature": "edu_Higher",
-      "Odds_Ratio": 1.033,
-      "CI_Lower": 0.006,
-      "CI_Upper": 7.618
+      "Feature": "num_sexual_partners",
+      "Odds_Ratio": 0.987,
+      "CI_Lower": 0.287,
+      "CI_Upper": 1.066
     },
     {
-      "Feature": "num_sexual_partners",
-      "Odds_Ratio": 1.02,
-      "CI_Lower": 0.072,
-      "CI_Upper": 1.107
+      "Feature": "wealth_Poorer",
+      "Odds_Ratio": 0.973,
+      "CI_Lower": 0.004,
+      "CI_Upper": 14.229
     },
     {
       "Feature": "worked_last_12months",
-      "Odds_Ratio": 1.02,
-      "CI_Lower": 0.371,
-      "CI_Upper": 2.828
-    },
-    {
-      "Feature": "county",
-      "Odds_Ratio": 0.982,
-      "CI_Lower": 0.921,
-      "CI_Upper": 1.033
-    },
-    {
-      "Feature": "edu_Secondary",
-      "Odds_Ratio": 0.923,
-      "CI_Lower": 0.19,
-      "CI_Upper": 10.773
-    },
-    {
-      "Feature": "wealth_Richer",
-      "Odds_Ratio": 0.88,
-      "CI_Lower": 0.026,
-      "CI_Upper": 10.104
-    },
-    {
-      "Feature": "distance_to_facility",
-      "Odds_Ratio": 0.763,
-      "CI_Lower": 0.129,
-      "CI_Upper": 2.097
-    },
-    {
-      "Feature": "wealth_Poorest",
-      "Odds_Ratio": 0.741,
-      "CI_Lower": 0.193,
-      "CI_Upper": 8.062
+      "Odds_Ratio": 0.909,
+      "CI_Lower": 0.376,
+      "CI_Upper": 1.768
     },
     {
       "Feature": "edu_Primary",
-      "Odds_Ratio": 0.361,
-      "CI_Lower": 0.05,
-      "CI_Upper": 2.605
+      "Odds_Ratio": 0.852,
+      "CI_Lower": 0.14,
+      "CI_Upper": 4.03
     },
     {
-      "Feature": "tested_hiv_last_12months",
-      "Odds_Ratio": 0.0,
+      "Feature": "wealth_Richer",
+      "Odds_Ratio": 0.839,
+      "CI_Lower": 0.12,
+      "CI_Upper": 8.865
+    },
+    {
+      "Feature": "edu_Secondary",
+      "Odds_Ratio": 0.693,
+      "CI_Lower": 0.121,
+      "CI_Upper": 7.932
+    },
+    {
+      "Feature": "distance_to_facility",
+      "Odds_Ratio": 0.631,
+      "CI_Lower": 0.072,
+      "CI_Upper": 2.77
+    },
+    {
+      "Feature": "wealth_Poorest",
+      "Odds_Ratio": 0.562,
+      "CI_Lower": 0.167,
+      "CI_Upper": 3.425
+    },
+    {
+      "Feature": "edu_Higher",
+      "Odds_Ratio": 0.467,
+      "CI_Lower": 0.002,
+      "CI_Upper": 6.407
+    },
+    {
+      "Feature": "ever_tested_hiv",
+      "Odds_Ratio": 0.103,
       "CI_Lower": 0.0,
-      "CI_Upper": 0.0
+      "CI_Upper": 0.321
     }
   ]
 }
