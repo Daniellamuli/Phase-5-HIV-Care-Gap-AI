@@ -264,22 +264,27 @@ XGB_SCALE_POS_WEIGHT = 1236  # Calculated from Lorenah's DHS cleaning output
 #                            wealth_Poorest, wealth_Richer, wealth_Richest
 
 # Features used for MODEL2 training (post one-hot encoding column names)
+# ⚠ DATA LEAKAGE FIX: tested_hiv_last_12months REMOVED
+# dropout = (ever_tested_hiv==1) AND (tested_hiv_last_12months==0)
+# Including tested_hiv_last_12months as a feature is textbook leakage —
+# it is literally part of the target variable definition.
+# Its OR was -10.699 (OR=0.000), dominating every other signal.
 MODEL2_FEATURES = [
     "county",
     "age_group",
     "marital_status",
     "distance_to_facility",
     "ever_tested_hiv",
-    "tested_hiv_last_12months",
+    # tested_hiv_last_12months REMOVED — data leakage
     "num_sexual_partners",
     "worked_last_12months",
     "currently_in_union",
-    # One-hot encoded education (edu_ prefix from Lorenah's DHSCleaner)
+    # One-hot encoded education
     "edu_Higher",
     "edu_No education",
     "edu_Primary",
     "edu_Secondary",
-    # One-hot encoded wealth (wealth_ prefix from Lorenah's DHSCleaner)
+    # One-hot encoded wealth
     "wealth_Middle",
     "wealth_Poorer",
     "wealth_Poorest",
