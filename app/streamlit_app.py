@@ -1,6 +1,6 @@
 """
 HIV Care Gap AI Dashboard
-Kenya HIV Care Gap AI — County Risk Mapping · Dropout Prediction · 2030 Scenario Forecasting
+Kenya HIV Care Gap AI - County Risk Mapping · Dropout Prediction · 2030 Scenario Forecasting
 """
 
 import streamlit as st
@@ -29,7 +29,9 @@ st.set_page_config(
 )
 
 # ── Logo + Title
-logo_path = os.path.join(PROJECT_ROOT, "figures", "logo.jpg")
+logo_path = os.path.join(PROJECT_ROOT, "figures", "logo.png")
+if not os.path.exists(logo_path):
+    logo_path = os.path.join(PROJECT_ROOT, "figures", "logo.jpg")
 col_logo, col_title = st.columns([1, 8])
 with col_logo:
     if os.path.exists(logo_path):
@@ -50,7 +52,7 @@ TIER_COLORS = {
 }
 
 # ── Readable column names for Tab 1 summary table
-# art_coverage excluded — placeholder value (0.5) for all counties
+# art_coverage excluded - placeholder value (0.5) for all counties
 READABLE_COLS = {
     "county":              "County",
     "period":              "Year",
@@ -173,7 +175,7 @@ with tab1:
             st.metric("🟢 Low Counties", tier_counts.get("Low", 0))
 
         if cgi_col:
-            st.subheader("County Risk Stratification — Tier Distribution")
+            st.subheader("County Risk Stratification - Tier Distribution")
             st.caption(
                 "Each bar represents one county. Longer bar = larger care gap = higher priority. "
                 "The red dashed line is the national average CGI."
@@ -201,6 +203,37 @@ with tab1:
             from streamlit_folium import st_folium
 
             m = folium.Map(location=[0.5, 38.0], zoom_start=6, tiles="CartoDB positron")
+
+
+            # CHOROPLETH LAYER
+            geojson_path = os.path.join(PROJECT_ROOT, "data", "kenya_counties.geojson")
+            if os.path.exists(geojson_path) and df_county is not None:
+                import json as _json
+                with open(geojson_path) as _f:
+                    kenya_geojson = _json.load(_f)
+                COUNTY_NAME_FIXES = {
+                    "THARAKA-NITHI": "Tharaka Nithi", "ELGEYO-MARAKWET": "Elgeyo Marakwet",
+                    "HOMA BAY": "Homa Bay", "TAITA TAVETA": "Taita Taveta",
+                    "TANA RIVER": "Tana River", "WEST POKOT": "West Pokot",
+                    "UASIN GISHU": "Uasin Gishu", "MURANG'A": "Murang'a",
+                    "TRANS-NZOIA": "Trans Nzoia", "TRANS NZOIA": "Trans Nzoia",
+                }
+                tier_color_lookup = {}
+                if "tier" in df_county.columns:
+                    for _, _r in df_county.iterrows():
+                        tier_color_lookup[_r["county"]] = TIER_COLORS.get(_r["tier"], "#808080")
+                def _style_choropleth(feature):
+                    raw    = feature["properties"].get("COUNTY_NAM") or ""
+                    county = COUNTY_NAME_FIXES.get(raw.upper(), raw.title())
+                    fill   = tier_color_lookup.get(county, "#CCCCCC")
+                    return {"fillColor": fill, "color": "#555555", "weight": 1.0, "fillOpacity": 0.85}
+                try:
+                    folium.GeoJson(
+                        kenya_geojson, style_function=_style_choropleth, name="County Risk Tiers",
+                        tooltip=folium.GeoJsonTooltip(fields=["COUNTY_NAM"], aliases=["County:"], style="font-size:12px;"),
+                    ).add_to(m)
+                except Exception as _err:
+                    st.caption(f"Choropleth skipped: {_err}")
 
             county_coords = {
                 "Baringo": [0.4667, 35.9667], "Bomet": [-0.7833, 35.3333],
@@ -308,16 +341,12 @@ with tab2:
     st.header(c.TAB2_TITLE)
 
     st.info(
-        "This section helps identify which patients are most at risk "
-        "of dropping out of HIV care (interrupting treatment). "
-        "It uses logistic regression trained on Kenya DHS 2022 survey data (32,156 individuals). "
-        "Enter a patient's profile to estimate their risk level and see which factors "
-        "are most strongly associated with treatment dropout."
-    )
-
-    st.markdown(
-        "Enter a patient profile below to estimate their HIV care dropout "
-        "risk profile and see the top risk factors from logistic regression odds ratio analysis."
+        "This tab identifies which demographic factors are most strongly associated with "
+        "HIV care dropout in Kenya, using Logistic Regression on Kenya DHS 2022 (32,156 individuals).\n\n"
+        "⚠️ This is **NOT an individual clinical prediction tool.** With only 26 confirmed dropout cases "
+        "(0.08% prevalence), no model can reliably predict individual outcomes. "
+        "The Odds Ratio forest plot and tables below are the primary output and are fully reliable. "
+        "The demographic profile explorer is a supplementary population-risk interpretation tool."
     )
     st.markdown("---")
 
@@ -328,11 +357,11 @@ with tab2:
     distance_options = [v for k, v in c.DHS_DISTANCE_MAP.items() if k != 998]
     marital_options  = list(c.DHS_MARITAL_MAP.values())
 
-    st.subheader("🧮 Patient Risk Profile Calculator")
+    st.subheader("🧮 Demographic Profile Explorer")
     st.caption(
-        "Select a patient's demographic profile and click 'Calculate Risk Profile'. "
-        "The result shows their estimated likelihood of interrupting HIV treatment, "
-        "based on population-level patterns from Kenya DHS 2022."
+        "Select a demographic profile and click 'Explore Risk Profile'. "
+        "Results show which associated-risk category this profile belongs to, "
+        "based on odds ratios from Logistic Regression on Kenya DHS 2022."
     )
 
     if model_name == "unavailable":
@@ -355,55 +384,56 @@ with tab2:
         with col3:
             distance_to_facility = st.selectbox("Distance to Facility", distance_options)
             marital_status       = st.selectbox("Marital Status", marital_options)
-        submitted = st.form_submit_button("Calculate Risk Profile", use_container_width=True)
+        submitted = st.form_submit_button("🔍 Explore Risk Profile", use_container_width=True)
 
     if submitted:
-        if model_name != "unavailable" and model is not None:
-            age_code     = [k for k, v in c.DHS_AGE_GROUP_MAP.items() if v == age_group][0]
-            marital_code = [k for k, v in c.DHS_MARITAL_MAP.items() if v == marital_status][0]
-            dist_code    = [k for k, v in c.DHS_DISTANCE_MAP.items() if v == distance_to_facility][0]
-            county_code  = [k for k, v in c.DHS_COUNTY_MAP.items() if v == county][0] if hasattr(c, "DHS_COUNTY_MAP") else 1
-            edu_higher    = 1 if education_level == "Higher"      else 0
-            edu_no_edu    = 1 if education_level == "No education" else 0
-            edu_primary   = 1 if education_level == "Primary"      else 0
-            edu_secondary = 1 if education_level == "Secondary"    else 0
-            wealth_middle  = 1 if wealth_index == "Middle"  else 0
-            wealth_poorer  = 1 if wealth_index == "Poorer"  else 0
-            wealth_poorest = 1 if wealth_index == "Poorest" else 0
-            wealth_richer  = 1 if wealth_index == "Richer"  else 0
-            wealth_richest = 1 if wealth_index == "Richest" else 0
-            feature_vector = np.array([[
-                county_code, age_code, marital_code, dist_code,
-                1, 1, 0, 0, 0,
-                edu_higher, edu_no_edu, edu_primary, edu_secondary,
-                wealth_middle, wealth_poorer, wealth_poorest, wealth_richer, wealth_richest,
-            ]])
-            try:
-                actual_model = model["model"] if isinstance(model, dict) else model
-                prob = actual_model.predict_proba(feature_vector)[0][1]
-                pct  = prob * 100
-                st.markdown("### 🎯 Estimated Dropout Risk Profile")
-                st.caption(
-                    "Based on logistic regression odds ratio analysis — "
-                    "this is a population-level risk indicator, not an individual clinical prediction."
-                )
-                if pct >= 60:
-                    st.error(f"🔴 **Elevated Risk Profile: {pct:.1f}%** — Priority follow-up recommended")
-                elif pct >= 30:
-                    st.warning(f"🟠 **Moderate Risk Profile: {pct:.1f}%** — Schedule follow-up within 30 days")
-                else:
-                    st.success(f"🟢 **Lower Risk Profile: {pct:.1f}%** — Routine monitoring")
-                st.progress(int(min(pct, 100)))
-                st.caption(f"Estimated likelihood: {pct:.2f}% | Model: {model_name}")
-            except Exception as e:
-                st.error(f"Prediction error: {e}")
-        else:
-            st.info("Risk profile calculator requires the trained model. Risk factor analysis below is still available.")
+        if odds_data is not None:
+            edu_no_edu     = 1 if education_level == "No education" else 0
+            edu_higher     = 1 if education_level == "Higher"       else 0
+            edu_primary    = 1 if education_level == "Primary"      else 0
+            wealth_richest = 1 if wealth_index == "Richest"         else 0
+            marital_code   = [k for k, v in c.DHS_MARITAL_MAP.items() if v == marital_status][0]
+            dist_code      = [k for k, v in c.DHS_DISTANCE_MAP.items() if v == distance_to_facility][0]
 
+            strong, moderate, protective = [], [], []
+            if edu_no_edu:
+                strong.append("No formal education (OR=6.26 - strongest risk factor)")
+            if wealth_richest:
+                strong.append("Richest wealth quintile (OR=2.59)")
+            if marital_code in [2, 3, 4]:
+                moderate.append("Marital status associated with moderate risk (OR=1.46)")
+            if dist_code == 1:
+                protective.append("Close to health facility (OR=0.63 - protective)")
+            if edu_higher:
+                protective.append("Higher education (OR=0.47 - strongly protective)")
+            if edu_primary:
+                protective.append("Primary education (OR=0.85 - mildly protective)")
+
+            st.markdown("### 🎯 Demographic Risk Profile Result")
+            if len(strong) >= 1:
+                st.error("🔴 **Strong Associated-Risk Profile**\n\nThis profile matches characteristics strongly associated with HIV care dropout. Priority follow-up recommended for patient groups with this profile.")
+            elif len(moderate) >= 1 and len(protective) == 0:
+                st.warning("🟠 **Moderate Associated-Risk Profile**\n\nThis profile has characteristics moderately associated with dropout risk. Proactive check-ins recommended.")
+            else:
+                st.success("🟢 **Lower Associated-Risk Profile**\n\nThis profile does not strongly match high-risk characteristics. Routine monitoring is appropriate. Individual clinical assessment always takes precedence.")
+
+            if strong:
+                st.markdown("**High-OR factors present:**")
+                for r in strong: st.markdown(f"  - {r}")
+            if moderate:
+                st.markdown("**Moderate-OR factors present:**")
+                for r in moderate: st.markdown(f"  - {r}")
+            if protective:
+                st.markdown("**Protective factors present:**")
+                for r in protective: st.markdown(f"  - {r}")
+
+            st.caption("Population-level indicator only - not an individual clinical prediction. Based on odds ratios from Logistic Regression (Kenya DHS 2022, n=32,156, 26 dropout cases).")
+        else:
+            st.info("Run `scripts/train_model2.py` to generate odds ratio data.")
     st.markdown("---")
 
     st.subheader("📊 Top 5 Risk Factors for HIV Care Dropout")
-    st.caption("Odds ratios with 95% bootstrap confidence intervals — Logistic Regression (Kenya DHS 2022, n=32,156)")
+    st.caption("Odds ratios with 95% bootstrap confidence intervals - Logistic Regression (Kenya DHS 2022, n=32,156)")
     st.info(
         "📖 **How to read this chart:** An Odds Ratio (OR) greater than 1 means that factor "
         "is associated with a HIGHER risk of dropping out of HIV care. "
@@ -494,7 +524,7 @@ with tab2:
     st.info(
         "📖 **AUC-ROC:** How well the model separates high-risk from low-risk patients "
         "(0.5 = random guess, 1.0 = perfect). "
-        "**Recall:** The most important metric here — how many truly at-risk patients "
+        "**Recall:** The most important metric here - how many truly at-risk patients "
         "the model correctly flags. Missing a high-risk patient is worse than a false alarm."
     )
     if baseline:
@@ -510,7 +540,7 @@ with tab2:
 **Dropout cases:** Only 26 confirmed dropouts (0.08% prevalence)
 **Key limitation:** Very low dropout prevalence means precision is low.
 Recall is the primary metric in this public health context.
-**Note on `ever_tested_hiv` OR:** Wide CI [0.038, >40] is a known limitation —
+**Note on `ever_tested_hiv` OR:** Wide CI [0.038, >40] is a known limitation -
 nearly all 26 dropouts share the same value, making bootstrap unstable.
             """)
     else:
@@ -524,20 +554,22 @@ with tab3:
     st.caption("Scenario-based projection of IIT and VLS rates per county tier, 2025–2030")
 
     st.info(
-        "This tab answers the question: "
-        "*What happens to Kenya's HIV programme by 2030?* "
-        "It compares two futures:\n\n"
-        "🔵 **Scenario A — Business as Usual:** Nothing changes. "
-        "Current treatment interruption rates continue to 2030.\n\n"
-        "🔴 **Scenario B — Bridged Gap:** Kenya intervenes. "
-        "Treatment interruption rates are reduced by 30% in the most critical counties "
-        "starting 2026 through targeted community health worker programmes.\n\n"
-        "The gap between the two lines = the impact of intervention."
+        "**What happens to Kenya's HIV programme by 2030?**\n\n"
+        "🔵 **Scenario A (Business as Usual):** Current IIT rates stay flat through 2030. "
+        "This is what happens if no new action is taken.\n\n"
+        "🔴 **Scenario B (Bridged Gap):** A 30% reduction in IIT rates is applied to Critical and High tier "
+        "counties from 2026 through targeted CHW retention programmes. "
+        "The gap between the two lines = the quantified impact of that intervention.\n\n"
+        "**Why does Scenario B show a one-time drop in 2026 then stay flat?** "
+        "This is by design. The model applies a sustained 30% reduction from 2026 onwards, "
+        "not a continuing annual decline. With only one year of data (2025), there is no evidence base "
+        "to model year-on-year improvement. The 30% reduction is grounded in PEPFAR Kenya retention "
+        "programme evidence. Moderate and Low tiers show identical lines as they do not receive the intervention."
     )
 
     st.subheader("📊 Treatment Interruption Rate Projections by Tier")
     st.caption(
-        "IIT = Interruption in Treatment — when a patient misses their ART visit by 28+ days. "
+        "IIT = Interruption in Treatment - when a patient misses their ART visit by 28+ days. "
         "Lower rate = more patients staying on treatment = better outcomes."
     )
 
@@ -556,7 +588,7 @@ with tab3:
                         linewidth=2, label="Scenario B (30% IIT Reduction)")
             ax.set_xlabel("Year")
             ax.set_ylabel("Treatment Interruption Rate")
-            ax.set_title(f"{tier} Tier — Treatment Interruption Rate 2025–2030", fontweight="bold")
+            ax.set_title(f"{tier} Tier - Treatment Interruption Rate 2025–2030", fontweight="bold")
             ax.set_xticks([2025, 2026, 2027, 2028, 2029, 2030])
             ax.yaxis.set_major_formatter(mticker.FormatStrFormatter("%.4f"))
             ax.legend()
@@ -596,7 +628,7 @@ with tab3:
 
     st.subheader("🇰🇪 National Viral Load Suppression Rate")
     st.caption(
-        "VLS = Viral Load Suppression — when ART reduces HIV to undetectable levels. "
+        "VLS = Viral Load Suppression - when ART reduces HIV to undetectable levels. "
         "Higher is better. The UNAIDS 95% target means 95% of ART patients should be "
         "virally suppressed by 2030 (part of the global 95-95-95 targets)."
     )
@@ -654,7 +686,7 @@ with tab3:
     st.subheader("📋 County Comparison (2025 Baseline)")
     st.info(
         "📖 This table compares all 47 counties using 2025 data. "
-        "**Highest Risk Counties** have the largest Care Gap Index — meaning more patients "
+        "**Highest Risk Counties** have the largest Care Gap Index - meaning more patients "
         "are interrupting treatment and fewer are virally suppressed. These need help first. "
         "**Best Performing Counties** have the smallest gaps and are closest to the UNAIDS targets. "
         "Note: A county's tier (Critical/High/Moderate/Low) is assigned by the AI clustering model "
@@ -708,7 +740,7 @@ with tab3:
 - **IIT (Interruption in Treatment):** Patient misses ART visit by 28+ days
 - **VLS (Viral Load Suppression):** HIV reduced to undetectable levels on ART
 - **CGI (Care Gap Index):** IIT rate (40%) + inverse VLS rate (40%) + HTS positivity (20%)
-- **ART:** Antiretroviral Therapy — medicine that treats HIV
+- **ART:** Antiretroviral Therapy - medicine that treats HIV
 
 **Scenarios:**
 - **Scenario A (BAU):** Current treatment interruption rates remain constant through 2030
