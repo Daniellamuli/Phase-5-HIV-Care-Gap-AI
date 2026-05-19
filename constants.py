@@ -223,7 +223,7 @@ TIER_LABELS         = ["Critical", "High", "Moderate", "Low"]
 #   - "iit_yoy_change": DROPPED — only 2025 period available; no prior
 #                       year to compute year-on-year change
 # Re-add art_coverage / iit_yoy_change here when multi-period data is available.
-KMEANS_FEATURES     = ["iit_rate", "vls_rate"]
+KMEANS_FEATURES     = ["iit_rate", "vls_rate_adult"]
 
 # k=4 is a deliberate project decision to produce 4 named tiers
 # (Critical / High / Moderate / Low). Silhouette analysis favours k=3
