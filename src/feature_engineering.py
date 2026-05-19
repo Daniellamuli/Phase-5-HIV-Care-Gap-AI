@@ -195,9 +195,13 @@ def build_county_profiles(df, save=True):
 
     df = df.copy()
 
+    # Handle both 'period' and 'Period' column names
+    period_col = NSDCC_PERIOD_COL if NSDCC_PERIOD_COL in df.columns else "period"
+    county_col = NSDCC_COUNTY_COL if NSDCC_COUNTY_COL in df.columns else "county"
+
     county_profiles = (
-        df.sort_values(NSDCC_PERIOD_COL)
-        .groupby(NSDCC_COUNTY_COL)
+        df.sort_values(period_col)
+        .groupby(county_col)
         .last()
         .reset_index()
     )
