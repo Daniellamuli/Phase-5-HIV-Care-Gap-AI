@@ -61,6 +61,29 @@ def calculate_yoy_change(df, value_col):
 
     return df
 
+
+# ========================================================
+    # COMPUTE IIT RATE
+    # iit_rate_pct exists in merged data as percentage (0-100)
+    # Convert to decimal (0-1) for CGI formula
+    # ========================================================
+
+    if "iit_rate" not in df.columns:
+        if "iit_rate_pct" in df.columns:
+            df["iit_rate"] = df["iit_rate_pct"] / 100
+            print("  Computed iit_rate from iit_rate_pct")
+        elif "iit_count" in df.columns and "adults_on_treatment" in df.columns:
+            df["iit_rate"] = (
+                df["iit_count"] / df["adults_on_treatment"]
+            ).fillna(0)
+            print("  Computed iit_rate from iit_count / adults_on_treatment")
+        else:
+            raise ValueError(
+                "Cannot compute iit_rate: neither iit_rate_pct nor "
+                "iit_count/adults_on_treatment found in data."
+            )
+
+
 # ============================================================
 # ENGINEER YOY FEATURES
 # ============================================================
