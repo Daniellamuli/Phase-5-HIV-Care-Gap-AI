@@ -149,8 +149,8 @@ def run_retraining_pipeline(year: int):
     # ── Step 1: Clean NSDCC
     print("\n  [1/7] Cleaning NSDCC files...")
     try:
-        from scripts.clean_data import clean_nsdcc
-        clean_nsdcc()
+        from scripts.extract_data import extract_all
+        extract_all()
         passed.append("clean_nsdcc")
         print("  ✓ Step 1 done")
     except Exception as e:
@@ -163,8 +163,8 @@ def run_retraining_pipeline(year: int):
     # ── Step 2: Merge NSDCC
     print("\n  [2/7] Merging NSDCC files → nsdcc_clean.csv...")
     try:
-        from scripts.merge_data import merge_nsdcc_files
-        merge_nsdcc_files()
+        from scripts.merge_data import run_merge
+        run_merge()
         passed.append("merge_nsdcc_files")
         print("  ✓ Step 2 done")
     except Exception as e:
@@ -190,8 +190,8 @@ def run_retraining_pipeline(year: int):
     # ── Step 4: Train Model 1 (KMeans → new tier assignments)
     print("\n  [4/7] Retraining Model 1 — KMeans clustering...")
     try:
-        from scripts.train_model1 import train_kmeans
-        train_kmeans()
+        from scripts.train_model1 import run_kmeans
+        run_kmeans()
         passed.append("train_model1")
         print("  ✓ Step 4 done")
     except Exception as e:
