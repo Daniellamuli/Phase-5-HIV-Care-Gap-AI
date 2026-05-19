@@ -274,7 +274,8 @@ hiv-care-gap-ai/
 │ └── 10_final_evaluation_business_report.ipynb
 │
 ├── presentation/ # Presentation materials
-│ └── .gitkeep
+│ ├── .gitkeep
+│ └── hiv_care_gap_presentation
 │
 ├── scripts/ # Production scripts
 │ ├── .gitkeep
@@ -296,6 +297,7 @@ hiv-care-gap-ai/
 │ └── utils.py
 │
 └── tableau/ # Tableau exports
-└── .gitkeep
+│ ├── .gitkeep
+│ └── prep_tableau_data.py
 ```
 ---
