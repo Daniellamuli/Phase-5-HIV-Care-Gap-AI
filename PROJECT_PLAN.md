@@ -125,7 +125,7 @@ We have **6 raw files** from two sources:
 | **Lorenah** | Test `trigger_alerts.py` with current data. | Alerts tested |
 | **Verah** | Update `README.md` with setup and run instructions. **Include Model 3 methodology update section explaining switch from Prophet to scenario projection.** | README complete |
 | **Naomi** | Final deployment to Streamlit Cloud (production) + Update `09_deployment.ipynb` with final URL`. | Live dashboard URL, final 09_deployment.ipynb |
-| **Dennis** | Complete `10_monitoring.ipynb` (documentation for annual updates). | Monitoring notebook |
+| **Dennis** | Complete `10_final_evaluation_business_report.ipynb` (documentation for annual updates). | Monitoring notebook |
 | **Daniella** | Review PRs, coordinate final checks. | All PRs merged |
 
 ---
@@ -138,7 +138,7 @@ We have **6 raw files** from two sources:
 | **Lorenah** | Polish dashboard (error handling, loading states, tooltips) + Final browser check. | Dashboard final |
 | **Verah** | Review README, ensure all commands work + Final `trigger_alerts.py` test. | README verified, alerts ready |
 | **Naomi** | Final dashboard check on all browsers + mobile + Fix any issues found. | Dashboard verified |
-| **Dennis** | Audit `constants.py` for hard-coded values + Complete `10_monitoring.ipynb`. | `constants.py` final, monitoring done |
+| **Dennis** | Audit `constants.py` for hard-coded values + Complete `10_final_evaluation_business_report.ipynb`. | `constants.py` final, monitoring done |
 | **Daniella** | Create complete presentation deck (10-12 slides): Title, Problem, Data, Model 1, Model 2, Model 3 (scenario projection + cross-sectional), Dashboard, Recommendations, Limitations, Conclusion. | Slides complete |
 
 ---
