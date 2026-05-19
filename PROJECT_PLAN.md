@@ -6,35 +6,6 @@
 
 ---
 
-## ⚠️ Model 3 Methodology Update
-
-**Original plan:** Facebook Prophet time-series forecasting
-
-**Change made:** Switched to **scenario-based linear projection + cross-sectional comparison**
-
-**Reason:** NSDCC portal only provides 2025 raw data. Prophet requires a minimum of 3-4 years of historical data to detect trends. With a single year, Prophet would produce unreliable forecasts.
-
-**Impact on deliverables:** None — all original deliverables are preserved.
-
-**New Model 3 has two components:**
-
-### Component A — Scenario-Based Projection (2025 → 2030)
-- **Scenario A (BAU):** Current 2025 IIT and VLS rates held flat to 2030
-- **Scenario B (Bridged Gap):** 30% IIT reduction in Critical + High tier
-  counties from 2026 (`IIT_REDUCTION_RATE = 0.30` in constants.py)
-- Output: Four tier line charts + national headline chart + 5 projection CSVs
-
-### Component B — Cross-Sectional Comparison (NEW)
-Uses 2025 snapshot to compare all 47 counties against each other:
-
-| Analysis | What it shows |
-|----------|---------------|
-| Best vs worst counties | Which counties need immediate attention |
-| Regional patterns | Which regions have systemic issues |
-| Urban vs rural | Access disparities |
-
----
-
 ## Data Sources
 
 We have **6 raw files** from two sources:
@@ -206,7 +177,7 @@ We have **6 raw files** from two sources:
 - [ ] Dashboard deployed to Streamlit Cloud — public URL works
 - [ ] `trigger_alerts.py` correctly flags counties above IIT threshold
 - [ ] `trigger_predictions.py` runs without errors
-- [ ] `final_notebook.ipynb` imports from src and shows all outputs
+- [ ] `10_final_evaluation_business_report.ipynb` imports from src and shows all outputs
 - [ ] All code uses `constants.py` — zero hard-coded values
 - [ ] All 10 notebooks run in sequence without errors
 - [ ] Presentation slides complete (15 min timed)
@@ -221,77 +192,110 @@ We have **6 raw files** from two sources:
 ```text
 hiv-care-gap-ai/
 │
+├── .gitignore # Git ignore rules
+├── PROJECT_PLAN.md # Project planning document
+├── README.md # Project overview
+├── constants.py # All paths, mappings, parameters
+├── main.py # Full pipeline runner
+├── requirements.txt # Python dependencies
+│
+├── app/ # Streamlit dashboard
+│ ├── .gitkeep
+│ ├── streamlit_app.py # Main deployed dashboard
+│ ├── trigger_alerts.py # IIT alert generator
+│ └── trigger_predictions.py # Annual retraining pipeline
+│
 ├── data/
-│   ├── raw/                         ← All 6 files present
-│   │   ├── Adult_on_ART.xlsx
-│   │   ├── Adult_on_HTS.xlsx
-│   │   ├── HTS_Positive.xlsx
-│   │   ├── IIT.xlsx
-│   │   ├── VLT.xlsx
-│   │   └── individual_features.csv
-│   │
-│   └── processed/                  ← Empty — will be populated
-│       ├── adult_on_art_clean.csv
-│       ├── hts_clean.csv
-│       ├── hts_positive_clean.csv
-│       ├── vlt_clean.csv
-│       ├── iit_clean.csv
-│       ├── individual_features_clean.csv
-│       ├── nsdcc_clean.csv
-│       ├── county_profiles.csv
-│       ├── tier_timeseries.csv
-│       ├── county_comparison.csv         ←cross-sectional comparison
-│       ├── projection_critical.csv
-│       ├── projection_high.csv
-│       ├── projection_moderate.csv
-│       ├── projection_low.csv
-│       └── projection_national.csv
+│ ├── processed/ # Cleaned outputs (committed for deployment)
+│ │ ├── .gitkeep
+│ │ ├── adult_on_art_clean.csv
+│ │ ├── county_comparison.csv
+│ │ ├── county_profiles.csv
+│ │ ├── county_profiles_tableau.csv
+│ │ ├── dropout_risk_factors.csv
+│ │ ├── forecast_all_tiers.csv
+│ │ ├── forecast_critical.csv
+│ │ ├── forecast_high.csv
+│ │ ├── forecast_low.csv
+│ │ ├── forecast_moderate.csv
+│ │ ├── forecast_national.csv
+│ │ ├── hts_clean.csv
+│ │ ├── hts_positive_clean.csv
+│ │ ├── iit_alerts.csv
+│ │ ├── iit_clean.csv
+│ │ ├── individual_features_clean.csv
+│ │ ├── logreg_baseline.json
+│ │ ├── nsdcc_clean.csv
+│ │ ├── odds_ratios_flat.csv
+│ │ ├── odds_ratios_with_ci.json
+│ │ ├── patients_retained.csv
+│ │ └── vlt_clean.csv
+│ │
+│ ├── raw/ # Original data (not committed)
+│ │ ├── .gitkeep
+│ │ ├── Adult_on_ART.xlsx
+│ │ ├── Adult_on_HTS.xlsx
+│ │ ├── HTS_Positive.xlsx
+│ │ ├── IIT.xlsx
+│ │ ├── VLT.xlsx
+│ │ └── individual_features.csv
+│ │
+│ └── kenya_counties.geojson # County boundaries for Folium map
 │
-├── notebooks/                      ← 11 notebooks total
-│   ├── 01_data_extraction.ipynb              COMPLETE (Naomi)
-│   ├── 02_nsdcc_cleaning.ipynb
-│   ├── 03_dhs_cleaning.ipynb
-│   ├── 04_feature_engineering.ipynb
-│   ├── 05_model_1_county_clustering.ipynb
-│   ├── 06_model_2_dropout_prediction.ipynb
-│   ├── 07_model_3_projection.ipynb
-│   ├── 08_model_evaluation.ipynb
-│   ├── 09_deployment.ipynb
-│   ├── 10_monitoring.ipynb
-│   └── final_notebook.ipynb
+├── figures/ # Generated visualisations
+│ ├── .gitkeep
+│ ├── confusion_matrix_logreg.png
+│ ├── county_risk_league_table.png
+│ ├── dhs_missing_after.png
+│ ├── dhs_missing_before.png
+│ ├── logo.jpg
+│ ├── model1_cgi_vs_iit_scatter.png
+│ ├── model1_silhouette_score.png
+│ ├── model1_tier_distribution.png
+│ ├── model3_patients_retained.png
+│ ├── odds_ratios_forest.png
+│ ├── odds_ratios_forest_with_ci.png
+│ └── roc_curve_logreg.png
 │
-├── src/
-│   ├── __init__.py
-│   ├── utils.py
-│   ├── nsdcc_cleaner.py
-│   ├── dhs_cleaner.py
-│   ├── feature_engineering.py
-│   ├── model_training.py
-│   ├── evaluation.py
-│   └── projection.py                 
+├── models/ # Trained model bundles
+│ ├── .gitkeep
+│ └── xgboost_dropout.pkl # Logistic regression bundle
 │
-├── scripts/
-│   ├── extract_data.py
-│   ├── merge_data.py
-│   ├── prepare_data.py
-│   ├── train_model1.py
-│   ├── train_model2.py
-│   └── train_model3.py              
+├── notebooks/ # CRISP-DM pipeline (01-10)
+│ ├── 01_data_extraction.ipynb
+│ ├── 02_nsdcc_cleaning.ipynb
+│ ├── 03_dhs_cleaning.ipynb
+│ ├── 04_feature_engineering.ipynb
+│ ├── 05_model_1_county_clustering.ipynb
+│ ├── 06_model_2_dropout_prediction.ipynb
+│ ├── 07_model_3_projection.ipynb
+│ ├── 08_model_evaluation.ipynb
+│ ├── 09_deployment.ipynb
+│ └── 10_final_evaluation_business_report.ipynb
 │
-├── app/
-│   ├── streamlit_app.py
-│   ├── trigger_alerts.py
-│   └── trigger_predictions.py
+├── presentation/ # Presentation materials
+│ └── .gitkeep
 │
-├── models/
-├── figures/
-├── presentation/
-├── tableau/
+├── scripts/ # Production scripts
+│ ├── .gitkeep
+│ ├── extract_data.py
+│ ├── merge_data.py
+│ ├── prepare_data.py
+│ ├── train_model1.py
+│ ├── train_model2.py
+│ └── train_model3.py
 │
-├── constants.py
-├── main.py
-├── requirements.txt
-├── .gitignore
-└── PROJECT_PLAN.md
+├── src/ # Source code modules
+│ ├── init.py
+│ ├── dhs_cleaner.py
+│ ├── evaluation.py
+│ ├── feature_engineering.py
+│ ├── model_training.py
+│ ├── nsdcc_cleaner.py
+│ ├── projection.py
+│ └── utils.py
+│
+└── tableau/ # Tableau exports
+└── .gitkeep
 ```
 ---
