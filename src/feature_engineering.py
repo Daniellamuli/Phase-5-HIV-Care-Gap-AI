@@ -195,9 +195,13 @@ def build_county_profiles(df, save=True):
 
     df = df.copy()
 
+    # Handle both 'period' and 'Period' column names
+    period_col = NSDCC_PERIOD_COL if NSDCC_PERIOD_COL in df.columns else "period"
+    county_col = NSDCC_COUNTY_COL if NSDCC_COUNTY_COL in df.columns else "county"
+
     county_profiles = (
-        df.sort_values(NSDCC_PERIOD_COL)
-        .groupby(NSDCC_COUNTY_COL)
+        df.sort_values(period_col)
+        .groupby(county_col)
         .last()
         .reset_index()
     )
@@ -261,6 +265,27 @@ def run_feature_engineering(df, save=True):
 
             raise ValueError(
                 "Missing HTS columns"
+            )
+
+    # ========================================================
+    # COMPUTE IIT RATE
+    # iit_rate_pct exists in merged data as percentage (0-100)
+    # Convert to decimal (0-1) for CGI formula
+    # ========================================================
+
+    if "iit_rate" not in df.columns:
+        if "iit_rate_pct" in df.columns:
+            df["iit_rate"] = df["iit_rate_pct"] / 100
+            print("  Computed iit_rate from iit_rate_pct")
+        elif "iit_count" in df.columns and "adults_on_treatment" in df.columns:
+            df["iit_rate"] = (
+                df["iit_count"] / df["adults_on_treatment"]
+            ).fillna(0)
+            print("  Computed iit_rate from iit_count / adults_on_treatment")
+        else:
+            raise ValueError(
+                "Cannot compute iit_rate: neither iit_rate_pct nor "
+                "iit_count/adults_on_treatment found in data."
             )
 
     # ========================================================
