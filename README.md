@@ -18,17 +18,17 @@
 
 ## The Problem
 
-Kenya's HIV response reversed course in 2024. New infections rose **19% in a single year** — from 16,752 to **19,991** — breaking a decade of hard-won progress. Just **10 counties account for 60% of all new infections**. Treatment Interruption (IIT), defined as missing an ART visit by 28 or more days, is the primary driver of viral rebound and onward transmission.
+Kenya's HIV response reversed course in 2024. New infections rose **19% in a single year** from 16,752 to **19,991** breaking a decade of hard-won progress. Just **10 counties account for 60% of all new infections**. Treatment Interruption (IIT), defined as missing an ART visit by 28 or more days, is the primary driver of viral rebound and onward transmission.
 
 Yet the Ministry of Health had no tool to answer three fundamental questions at county level:
 
 | Question | Why it matters |
 |----------|----------------|
-| **WHERE** is the health system losing patients, by county? | Resource allocation requires knowing which counties are worst — not just nationally |
+| **WHERE** is the health system losing patients, by county? | Resource allocation requires knowing which counties are worst, not just nationally |
 | **WHO** is most likely to disengage from care, by profile? | Community health worker outreach must be targeted to be effective |
-| **WHAT HAPPENS** by 2030 if we act — or if we don't? | Donors and policymakers need quantified projections to justify investment |
+| **WHAT HAPPENS** by 2030 if we act or if we don't? | Donors and policymakers need quantified projections to justify investment |
 
-**HIV Care Gap AI** builds that tool — three integrated models giving the MOH precision intelligence to close the gap.
+**HIV Care Gap AI** builds that tool three integrated models giving the MOH precision intelligence to close the gap.
 
 ---
 
@@ -36,11 +36,10 @@ Yet the Ministry of Health had no tool to answer three fundamental questions at 
 
 | Model | Question | Algorithm | Primary Output |
 |-------|----------|-----------|----------------|
-| **Model 1 — County Care Gap Map** | *Where* to intervene? | Care Gap Index (CGI) + KMeans clustering (k=4) | 47 counties tiered 🔴 Critical / 🟠 High / 🟡 Moderate / 🟢 Low |
-| **Model 2 — Dropout Risk Factors** | *Who* to prioritise? | Logistic Regression + 500-sample bootstrap | Odds ratios with 95% CI for 17 demographic features |
-| **Model 3 — 2030 Scenario Projection** | *What happens next?* | Tier-based scenario projection (BAU vs Bridged Gap) | Dual-scenario IIT/VLS trajectories + 233,186+ patients retained |
+| **Model 1:  County Care Gap Map** | *Where* to intervene? | Care Gap Index (CGI) + KMeans clustering (k=4) | 47 counties tiered 🔴 Critical / 🟠 High / 🟡 Moderate / 🟢 Low |
+| **Model 2: Dropout Risk Factors** | *Who* to prioritise? | Logistic Regression + 500-sample bootstrap | Odds ratios with 95% CI for 17 demographic features |
+| **Model 3: 2030 Scenario Projection** | *What happens next?* | Tier-based scenario projection (BAU vs Bridged Gap) | Dual-scenario IIT/VLS trajectories + 233,186+ patients retained |
 
-> **Important algorithm note:** Two decisions changed from the original proposal during execution — both for better, more defensible results. Prophet → Scenario-based projection (only 2025 data available; Prophet requires 3–4 years). XGBoost → Logistic Regression with odds ratios (DHS 2022 dropout rate was 0.08% — 26 positive cases out of 32,156 records; XGBoost predicted all-zeros at this imbalance). Odds ratios are the standard epidemiological language used in NASCOP and PEPFAR Kenya reports. Both changes are documented in `constants.py` and the relevant notebooks.
 
 ---
 
@@ -58,7 +57,7 @@ Yet the Ministry of Health had no tool to answer three fundamental questions at 
 
 ## Data Sources
 
-### Dataset 1 — NSDCC Raw Programme Data (Models 1 & 3)
+### Dataset 1: NSDCC Raw Programme Data (Models 1 & 3)
 
 Source: [analytics.nsdcc.go.ke](https://analytics.nsdcc.go.ke) → HIV Estimates 2025
 
@@ -75,9 +74,9 @@ Source: [analytics.nsdcc.go.ke](https://analytics.nsdcc.go.ke) → HIV Estimates
 
 > ⚠️ **IIT limitation (documented):** The IIT file contains data for 9 MOH administrative regions, not 47 counties. Counties within the same region share the same IIT rate, understating within-region variation. This is a source data limitation, not a project error.
 
-### Dataset 2 — DHS Kenya 2022 Individual Recode (Model 2)
+### Dataset 2: DHS Kenya 2022 Individual Recode (Model 2)
 
-Source: [dhsprogram.com](https://dhsprogram.com) — approved and downloaded.
+Source: [dhsprogram.com](https://dhsprogram.com); approved and downloaded.
 
 | Property | Value |
 |----------|-------|
@@ -85,8 +84,8 @@ Source: [dhsprogram.com](https://dhsprogram.com) — approved and downloaded.
 | Original columns | 5,925 |
 | Reduced to | 15 features (column-renamed from DHS codes) |
 | Final clean records | 32,156 |
-| Dropout cases | **26 (0.08%)** — extreme class imbalance |
-| Columns dropped | `knows_aids_death`, `has_health_insurance` (100% missing — DHS 2022 sampling design) |
+| Dropout cases | **26 (0.08%)** extreme class imbalance |
+| Columns dropped | `knows_aids_death`, `has_health_insurance` (100% missing DHS 2022 sampling design) |
 
 ---
 
@@ -106,23 +105,23 @@ Raw data (data/raw/)
   └─ NB10: Final Report         → business understanding, cross-model integration, MOH recommendations
 ```
 
-### Care Gap Index (CGI) — Model 1 Core Formula
+### Care Gap Index (CGI): Model 1 Core Formula
 
 $$\text{CGI} = \bigl(0.40 \times \text{IIT rate}\bigr) + \bigl(0.40 \times (1 - \text{VLS rate})\bigr) + \bigl(0.20 \times \text{HTS positivity rate}\bigr) \times 100$$
 
-- IIT rate carries **40%** weight — most direct signal of care cascade failure
-- Inverse VLS rate carries **40%** weight — ultimate clinical outcome
-- HTS positivity rate carries **20%** weight — burden signal
+- IIT rate carries **40%** weight, most direct signal of care cascade failure
+- Inverse VLS rate carries **40%** weight, ultimate clinical outcome
+- HTS positivity rate carries **20%** weight, burden signal
 
 ### Why k=4 and not k=3?
 
-Silhouette score for k=3 is 0.6582 (marginally higher than k=4 at **0.6359**). However, the intervention framework requires four distinct priority levels — Critical and High tiers each receive different intervention intensities in Model 3. Using k=3 would collapse two intervention levels and lose policy-relevant granularity. This decision is documented in `constants.py` and notebook 05.
+Silhouette score for k=3 is 0.6582 (marginally higher than k=4 at **0.6359**). However, the intervention framework requires four distinct priority levels; Critical and High tiers each receive different intervention intensities in Model 3. Using k=3 would collapse two intervention levels and lose policy-relevant granularity. This decision is documented in `constants.py` and notebook 05.
 
 ### Dropout Target Variable (Model 2)
 
 A person is flagged as a potential dropout if:
-- `told_hiv_positive == 1` — has been informed of HIV-positive status, **AND**
-- `tested_hiv_last_12months == 0` — has not engaged with testing services in the past 12 months
+- `told_hiv_positive == 1` has been informed of HIV-positive status, **AND**
+- `tested_hiv_last_12months == 0` has not engaged with testing services in the past 12 months
 
 > `tested_hiv_last_12months` is excluded from model features to prevent data leakage (it is part of the target definition).
 
@@ -136,7 +135,7 @@ A person is flagged as a potential dropout if:
 | **VLS Rate** | % of patients on ART with viral load below the suppression threshold |
 | **HTS Positivity Rate** | % of individuals tested who receive a positive HIV result |
 | **ART Coverage** | % of PLHIV currently receiving ART |
-| **Care Gap Index (CGI)** | Composite score (IIT × 40% + inverse VLS × 40% + HTS positivity × 20%) — higher = worse |
+| **Care Gap Index (CGI)** | Composite score (IIT × 40% + inverse VLS × 40% + HTS positivity × 20%) higher = worse |
 
 ---
 
@@ -153,7 +152,7 @@ A person is flagged as a potential dropout if:
 | 🟡 Moderate | 7 | — | — | Monitor |
 | 🟢 Low | 1 | — | — | Sustain |
 
-All 14 Critical tier counties are concentrated in the **Rift Valley region**. Together, Critical and High tiers account for **39 of 47 counties** — Kenya's HIV care gap is widespread, not isolated.
+All 14 Critical tier counties are concentrated in the **Rift Valley region**. Together, Critical and High tiers account for **39 of 47 counties** Kenya's HIV care gap is widespread, not isolated.
 
 > **Lamu anomaly:** Lamu ranks #1 on CGI (11.37) despite a low IIT rate (9.26%). Its VLS rate is the **lowest in Kenya at 81.36%** — patients are staying on ART but not suppressing virally. This is a medication adherence or drug supply issue, not a retention failure. Standard retention interventions will not fix Lamu. It is addressed separately in Recommendation 4.
 
@@ -167,7 +166,7 @@ All 14 Critical tier counties are concentrated in the **Rift Valley region**. To
 
 | Metric | Value |
 |--------|-------|
-| AUC-ROC | 0.7243 (primary metric — better than chance) |
+| AUC-ROC | 0.7243 (primary metric better than chance) |
 | Recall | 0.40 (40% of actual dropouts caught in test set) |
 | Bootstrap | 500-sample for 95% CIs on all odds ratios |
 
@@ -180,13 +179,13 @@ All 14 Critical tier counties are concentrated in the **Rift Valley region**. To
 | Currently in a union | 2.50× | |
 | Older age groups | 1.49× | |
 
-**Protective factors:** Wealth_Poorest (OR = 0.49), Secondary education (OR = 0.65), Primary education (OR = 0.86) — individuals who depend on public health infrastructure are more likely to remain in the system.
+**Protective factors:** Wealth_Poorest (OR = 0.49), Secondary education (OR = 0.65), Primary education (OR = 0.86) individuals who depend on public health infrastructure are more likely to remain in the system.
 
 > `ever_tested_hiv` shows OR ≈ 35 with CI (0.04–6,501). This is a **structural artefact**: by definition, only people who have ever tested HIV-positive can appear in the dropout group. The dashboard caps display at OR = 8.0 so this artefact does not destroy the axis scale.
 
 ![Forest Plot](figures/odds_ratios_forest.png)
 
-### Model 3 — 2030 Scenario Projection
+### Model 3: 2030 Scenario Projection
 
 - **Scenario A (BAU):** Current IIT and VLS rates remain constant through 2030
 - **Scenario B (Bridged Gap):** 30% IIT reduction applied to Critical and High tier counties from 2026; ΔVLS = −0.5 × ΔIIT (PEPFAR evidence-based formula)
@@ -196,9 +195,9 @@ All 14 Critical tier counties are concentrated in the **Rift Valley region**. To
 | Additional patients retained by 2030 | **233,186+** |
 | Critical tier IIT rate (Scenario B) | 15.30% → 10.71% |
 | High tier IIT rate (Scenario B) | 9.49% → 6.64% |
-| Moderate / Low tiers | Unchanged — intervention concentrated where return is highest |
+| Moderate / Low tiers | Unchanged intervention concentrated where return is highest |
 
-Every assumption is a named constant in `constants.py` — auditable and adjustable by MOH policymakers.
+Every assumption is a named constant in `constants.py` auditable and adjustable by MOH policymakers.
 
 ![BAU vs Bridged Gap](figures/BAU%20vs%20Bridged%20Gap%20line%20chart.png)
 
@@ -206,17 +205,17 @@ Every assumption is a named constant in `constants.py` — auditable and adjusta
 
 ## Four Data-Driven Recommendations for MOH Kenya
 
-**Recommendation 1 (Model 1 — County Care Gap Map)**
-Immediately prioritise retention in the 14 Critical tier counties (all Rift Valley region, IIT rate = 15.30%). Deploy CHW follow-up targeting patients who have missed ART visits — prioritise counties with IIT above national average **and** VLS below 90% simultaneously.
+**Recommendation 1 (Model 1: County Care Gap Map)**
+Immediately prioritise retention in the 14 Critical tier counties (all Rift Valley region, IIT rate = 15.30%). Deploy CHW follow-up targeting patients who have missed ART visits prioritise counties with IIT above national average **and** VLS below 90% simultaneously.
 
-**Recommendation 2 (Model 2 — Dropout Risk Factor Analysis)**
-Deploy differentiated follow-up protocols for the demographic profiles most strongly associated with dropout risk: no formal education (OR = 6.26×), individuals in a union (OR = 2.50×), and older age groups (OR = 1.49×). These are population-level signals for targeting outreach — not individual clinical scores.
+**Recommendation 2 (Model 2: Dropout Risk Factor Analysis)**
+Deploy differentiated follow-up protocols for the demographic profiles most strongly associated with dropout risk: no formal education (OR = 6.26×), individuals in a union (OR = 2.50×), and older age groups (OR = 1.49×). These are population-level signals for targeting outreach not individual clinical scores.
 
-**Recommendation 3 (Model 3 — 2030 Scenario Projection)**
-Applying a 30% IIT reduction in Critical and High tier counties from 2026 is projected to retain **233,186+ additional patients** on ART by 2030 — providing a quantified evidence base for PEPFAR, UNAIDS, and World Bank investment decisions.
+**Recommendation 3 (Model 3: 2030 Scenario Projection)**
+Applying a 30% IIT reduction in Critical and High tier counties from 2026 is projected to retain **233,186+ additional patients** on ART by 2030 providing a quantified evidence base for PEPFAR, UNAIDS, and World Bank investment decisions.
 
-**Recommendation 4 (Lamu — Special Case)**
-Investigate Lamu County separately as a **viral suppression failure, not a retention failure**. Lamu has the lowest VLS rate in Kenya (81.36%) while patients are staying on ART. This suggests drug resistance, stock-out, or sub-therapeutic dosing — requiring a different clinical response from the standard retention playbook.
+**Recommendation 4 (Lamu : Special Case)**
+Investigate Lamu County separately as a **viral suppression failure, not a retention failure**. Lamu has the lowest VLS rate in Kenya (81.36%) while patients are staying on ART. This suggests drug resistance, stock-out, or sub-therapeutic dosing requiring a different clinical response from the standard retention playbook.
 
 ---
 
@@ -357,8 +356,8 @@ jupyter notebook notebooks/01_data_extraction.ipynb
 |-----------|---------|
 | **01–04** | Data extraction, cleaning, and feature engineering |
 | **05–07** | Model development (KMeans, LogReg, Projection) |
-| **08** | Evaluation — all metrics consolidated |
-| **09** | Deployment — Streamlit Cloud |
+| **08** | Evaluation: all metrics consolidated |
+| **09** | Deployment: Streamlit Cloud |
 | **10** | Final evaluation + business report (loads artifacts, no retraining) |
 
 ---
@@ -447,11 +446,11 @@ When 2026 data is available, the planned next steps are:
 
 Specifically:
 
-1. **Raw NSDCC data** — every county-level metric computed from actual raw Excel exports, not published aggregate statistics
-2. **Three models, one system** — Where (county clustering), Who (odds ratio analysis), and What next (scenario projection) are integrated in a single pipeline and a single dashboard
-3. **Built for sustainability** — `trigger_predictions.py` makes this an annually renewable system, not a one-time analysis
+1. **Raw NSDCC data** : Every county-level metric computed from actual raw Excel exports, not published aggregate statistics
+2. **Three models, one system** : Where (county clustering), Who (odds ratio analysis), and What next (scenario projection) are integrated in a single pipeline and a single dashboard
+3. **Built for sustainability** : `trigger_predictions.py` makes this an annually renewable system, not a one-time analysis
 4. **Fully transparent** — every assumption in Model 3 is a named constant in `constants.py`; MOH policymakers can adjust the 30% IIT reduction assumption and regenerate projections in minutes
-5. **Honest about constraints** — both algorithm changes are proactively disclosed, justified, and documented in code
+5. **Honest about constraints** : Both algorithm changes are proactively disclosed, justified, and documented in code
 
 ---
 
@@ -469,11 +468,11 @@ Specifically:
 
 **Memory errors:** Reduce batch size in data processing scripts.
 
-**Missing models:** Ensure `python main.py` completed successfully before launching the dashboard. Streamlit Cloud requires all `.pkl` files and `data/processed/` outputs to be committed to the repository — it cannot run the pipeline at startup.
+**Missing models:** Ensure `python main.py` completed successfully before launching the dashboard. Streamlit Cloud requires all `.pkl` files and `data/processed/` outputs to be committed to the repository it cannot run the pipeline at startup.
 
 **Dashboard errors:** Verify all CSV files exist in `data/processed/`. Run the checklist in notebook 10 (`final_notebook.ipynb`) to confirm all outputs are present.
 
-**IIT data region mismatch:** If county names don't match expected values, check `src/nsdcc_cleaner.py` — the `expand_iit_regions()` function handles the 9-region → 47-county expansion.
+**IIT data region mismatch:** If county names don't match expected values, check `src/nsdcc_cleaner.py` the `expand_iit_regions()` function handles the 9-region → 47-county expansion.
 
 ---
 
