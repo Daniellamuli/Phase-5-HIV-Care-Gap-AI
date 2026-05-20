@@ -1,29 +1,30 @@
 {
   "model": "LogisticRegression",
-  "auc_roc": 0.6137,
+  "auc_roc": 0.6155,
   "recall": 0.4,
   "precision": 0.001,
-  "f1": 0.002,
-  "tn": 4440,
-  "fp": 1987,
+  "f1_score": 0.002,
+  "tn": 4452,
+  "fp": 1975,
   "fn": 3,
   "tp": 2,
-  "features_encoded": [
-    "age_group",
-    "marital_status",
-    "distance_to_facility",
-    "worked_last_12months",
-    "currently_in_union"
-  ],
-  "total_features": 17,
+  "n_features": 17,
+  "n_positive": 26,
+  "n_total": 32156,
   "top_risk_factors": [
     "edu_No education",
     "wealth_Richest",
     "currently_in_union"
   ],
   "top_risk_ors": [
-    6.257,
-    2.588,
-    2.497
+    6.93,
+    2.673,
+    2.589
+  ],
+  "protective_factors": [
+    "distance_to_facility",
+    "wealth_Poorest",
+    "edu_Higher",
+    "ever_tested_hiv"
   ]
 }

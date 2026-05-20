@@ -24,7 +24,7 @@ import constants as c
 # ── Page config
 st.set_page_config(
     page_title="HIV Care Gap AI Dashboard",
-    page_icon="🏥",
+
     layout="wide"
 )
 
