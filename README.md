@@ -257,8 +257,7 @@ hiv-care-gap-ai/
 │   ├── 07_model_3_projection.ipynb # Dual scenario forecasts to 2030
 │   ├── 08_model_evaluation.ipynb   # Consolidated metrics
 │   ├── 09_deployment.ipynb         # Streamlit Cloud deployment
-│   ├── 10_monitoring.ipynb
-│   └── final_notebook.ipynb        # Final evaluation + business report (NB10)
+│   └── 10_final_evaluation_business.ipynb        
 │
 ├── src/
 │   ├── nsdcc_cleaner.py            # expand_iit_regions() + county normalisation
@@ -349,7 +348,7 @@ Run notebooks 01–10 sequentially. Each notebook builds on the previous:
 ```bash
 jupyter notebook notebooks/01_data_extraction.ipynb
 # Continue through 02, 03, 04, 05, 06, 07, 08, 09 in order
-# Notebook 10 (final_notebook.ipynb) loads saved artifacts only — no retraining
+# Notebook 10 (final_evaluation_business.ipynb) loads saved artifacts only — no retraining
 ```
 
 | Notebooks | Purpose |
@@ -393,26 +392,6 @@ When 2026 data is available, the planned next steps are:
 | **Tab 1** | County Gap Map | Ranked league table + Folium choropleth (47 counties) + county data table + CSV export |
 | **Tab 2** | Risk Factors | Forest plot of odds ratios with 95% CI + top risk/protective factors + AUC-ROC |
 | **Tab 3** | Scenario Forecast | Scenario A vs B line charts per tier + patients retained counter + CSV export |
-
----
-
-## Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `pandas` | ≥ 1.5.0 | Data manipulation |
-| `numpy` | ≥ 1.23.0 | Numerical computing |
-| `scikit-learn` | ≥ 1.2.0 | KMeans, Logistic Regression |
-| `matplotlib` | ≥ 3.6.0 | Charts and figures |
-| `seaborn` | ≥ 0.12.0 | Statistical plots |
-| `streamlit` | ≥ 1.28.0 | Interactive dashboard |
-| `geopandas` | ≥ 0.12.0 | County boundary maps |
-| `folium` | ≥ 0.14.0 | Choropleth map rendering |
-| `streamlit-folium` | ≥ 0.11.0 | Folium inside Streamlit |
-| `openpyxl` | ≥ 3.0.0 | Read Excel (.xlsx) files |
-| `joblib` | ≥ 1.2.0 | Model serialisation (.pkl) |
-| `scipy` | ≥ 1.7.0 | Bootstrap confidence intervals |
-| `jupyter` | ≥ 1.0.0 | Notebook execution |
 
 ---
 
@@ -470,7 +449,7 @@ Specifically:
 
 **Missing models:** Ensure `python main.py` completed successfully before launching the dashboard. Streamlit Cloud requires all `.pkl` files and `data/processed/` outputs to be committed to the repository it cannot run the pipeline at startup.
 
-**Dashboard errors:** Verify all CSV files exist in `data/processed/`. Run the checklist in notebook 10 (`final_notebook.ipynb`) to confirm all outputs are present.
+**Dashboard errors:** Verify all CSV files exist in `data/processed/`. Run the checklist in notebook 10 (`final_evaluation_business_notebook.ipynb`) to confirm all outputs are present.
 
 **IIT data region mismatch:** If county names don't match expected values, check `src/nsdcc_cleaner.py` the `expand_iit_regions()` function handles the 9-region → 47-county expansion.
 
